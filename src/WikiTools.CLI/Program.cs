@@ -6,7 +6,7 @@ namespace WikiTool.CLI
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("WikiTool.CLI - .NET 8.0");
+            Console.WriteLine("WikiTool.CLI - .NET 9.0");
         }
     }
 }
