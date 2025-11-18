@@ -3,7 +3,7 @@ using System.IO;
 using WikiTools.Core;
 using Xunit;
 
-namespace WikiLib.Tests;
+namespace WikiTools.Core.Tests;
 
 public class WikidpadPageTests
 {

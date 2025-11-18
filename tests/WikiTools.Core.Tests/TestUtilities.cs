@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Text;
 
-namespace WikiLib.Tests
+namespace WikiTools.Core.Tests
 {
     public static class TestUtilities
     {
