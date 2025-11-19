@@ -115,11 +115,15 @@ public class WikidPadToObsidianConverter
         });
 
         // Second: Convert bare CamelCase WikiWords to [[WikiWord]]
-        // A WikiWord is CamelCase: starts with uppercase, at least one lowercase followed by uppercase
-        // Pattern: uppercase + lowercase(s) + (uppercase + lowercase(s))+
+        // A WikiWord in WikidPad must have mixed case (at least one uppercase and one lowercase)
+        // and at least 2 case transitions (e.g., Ab -> C, or AB -> c -> D)
+        // Examples: WikiWord, AbC, ABcd, AbcD, ABcD, AbCDe, WikiWord123
+        // We need to match: letter sequences with at least one uppercase, one lowercase, and another different case
         // Negative lookbehind (?<!\[) prevents matching if preceded by [
         // Negative lookahead (?!\]) prevents matching if followed by ]
-        var camelCasePattern = @"(?<!\[)\b([A-Z][a-z]+(?:[A-Z][a-z]+)+)\b(?!\])";
+        // This pattern matches any word that has at least one lowercase letter followed by an uppercase,
+        // OR at least two uppercase with a lowercase somewhere
+        var camelCasePattern = @"(?<!\[)\b([A-Z]*[a-z]+[A-Z][A-Za-z0-9]*|[A-Z]{2,}[a-z][A-Za-z0-9]*)\b(?!\])";
         content = Regex.Replace(content, camelCasePattern, match =>
         {
             return $"[[{match.Value}]]";

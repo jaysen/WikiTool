@@ -122,6 +122,42 @@ public class WikidPadToObsidianConverterTests
     }
 
     [Fact]
+    public void ConvertLinks_VariousCamelCasePatterns_ToDoubleSquareBrackets()
+    {
+        // Arrange - Test all the WikidPad CamelCase patterns
+        var content = "Test AbC and AbcD and ABcd and ABcD and AbCDe here";
+        var converter = CreateConverter();
+
+        // Act
+        var result = converter.ConvertContent(content);
+
+        // Assert
+        Assert.Contains("[[AbC]]", result);
+        Assert.Contains("[[AbcD]]", result);
+        Assert.Contains("[[ABcd]]", result);
+        Assert.Contains("[[ABcD]]", result);
+        Assert.Contains("[[AbCDe]]", result);
+    }
+
+    [Fact]
+    public void ConvertLinks_CamelCaseWithNumbers_ToDoubleSquareBrackets()
+    {
+        // Arrange
+        var content = "Test AbC123 and AbcD45 and ABcd6 and ABcD789 and AbCDe0 here";
+        var converter = CreateConverter();
+
+        // Act
+        var result = converter.ConvertContent(content);
+
+        // Assert
+        Assert.Contains("[[AbC123]]", result);
+        Assert.Contains("[[AbcD45]]", result);
+        Assert.Contains("[[ABcd6]]", result);
+        Assert.Contains("[[ABcD789]]", result);
+        Assert.Contains("[[AbCDe0]]", result);
+    }
+
+    [Fact]
     public void ConvertLinks_SingleBracketLink_ToDoubleSquareBrackets()
     {
         // Arrange
