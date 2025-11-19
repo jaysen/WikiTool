@@ -10,7 +10,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\WikiTools.Core\WikiTools.Core.csproj" />
+        <ProjectReference Include="..\WikiTools\WikiTools.csproj" />
     </ItemGroup>
 
 </Project>

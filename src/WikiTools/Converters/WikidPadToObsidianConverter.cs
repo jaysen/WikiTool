@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace WikiTools.Core.Converters;
+namespace WikiTools.Converters;
 
 public class WikidPadToObsidianConverter
 {

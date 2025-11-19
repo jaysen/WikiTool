@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace WikiTools.Core;
+namespace WikiTools;
 
 public abstract class Page
 {

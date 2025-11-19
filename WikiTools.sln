@@ -5,11 +5,11 @@ VisualStudioVersion = 16.0.31112.23
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WikiTools.CLI", "src\WikiTools.CLI\WikiTools.CLI.csproj", "{96C6C443-D621-4E04-B09B-77A783C9905A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WikiTools.Core", "src\WikiTools.Core\WikiTools.Core.csproj", "{9835C613-81C2-440F-8105-B844C2B39C61}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WikiTools", "src\WikiTools\WikiTools.csproj", "{9835C613-81C2-440F-8105-B844C2B39C61}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{F2C3CADE-4AF2-4794-8263-977B0ECDD3A5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WikiTools.Core.Tests", "tests\WikiTools.Core.Tests\WikiTools.Core.Tests.csproj", "{3628B51E-D797-4AE1-A3E4-BDC015296F1B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WikiTools.Tests", "tests\WikiTools.Tests\WikiTools.Tests.csproj", "{3628B51E-D797-4AE1-A3E4-BDC015296F1B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{CE2015EB-583E-4581-B4FD-F04503233C9D}"
 EndProject

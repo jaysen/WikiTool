@@ -1,9 +1,9 @@
 using System;
 using System.IO;
-using WikiTools.Core.Converters;
+using WikiTools.Converters;
 using Xunit;
 
-namespace WikiTools.Core.Tests;
+namespace WikiTools.Tests;
 
 public class WikidPadToObsidianConverterTests
 {

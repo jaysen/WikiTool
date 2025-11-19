@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace WikiTools.Core;
+namespace WikiTools;
 
 public class ObsidianWiki : LocalWiki
 {

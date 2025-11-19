@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace WikiTools.Core;
+namespace WikiTools;
 
 public abstract class LocalPage : Page
 {

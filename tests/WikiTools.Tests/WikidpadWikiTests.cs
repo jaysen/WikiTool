@@ -1,9 +1,9 @@
 ﻿using System.IO;
 using System.Text;
-using WikiTools.Core;
+using WikiTools;
 using Xunit;
 
-namespace WikiTools.Core.Tests;
+namespace WikiTools.Tests;
 
 public class WikidpadWikiTests
 {

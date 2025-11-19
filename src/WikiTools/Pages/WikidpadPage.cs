@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace WikiTools.Core;
+namespace WikiTools;
 
 public class WikidpadPage : LocalPage
 {

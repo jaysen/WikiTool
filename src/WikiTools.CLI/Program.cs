@@ -1,7 +1,7 @@
 ﻿using System;
 using System.CommandLine;
 using System.IO;
-using WikiTools.Core.Converters;
+using WikiTools.Converters;
 
 namespace WikiTools.CLI;
 
