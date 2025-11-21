@@ -20,7 +20,7 @@ public abstract class Page
     public abstract List<string> GetLinks();
     public abstract List<string> GetAliases();
     public abstract List<string> GetTags();
-
+    public abstract Dictionary<string, string> GetAttributes();
 
     public abstract bool ContainsText(string searchStr);
 

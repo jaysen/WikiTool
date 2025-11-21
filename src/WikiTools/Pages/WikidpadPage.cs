@@ -6,12 +6,15 @@ namespace WikiTools;
 
 public class WikidpadPage : LocalPage
 {
-    public WikidpadPage(string location) : base(location)
+    private WikidpadWiki _wiki;
+
+    public WikidpadPage(string location, WikidpadWiki wiki = null) : base(location)
     {
         if (System.IO.Path.GetExtension(location) != ".wiki")
         {
             throw new FormatException("This is not a path to a .wiki page");
         }
+        _wiki = wiki;
     }
 
     public override List<string> GetLinks()
@@ -24,10 +27,9 @@ public class WikidpadPage : LocalPage
         var links = new List<string>();
         var content = GetContent();
 
-        // Match WikidPad links: [WikiWord] or [[link with spaces]]
-        // WikiWords (CamelCase words)
-        var wikiWordPattern = @"\[\[([^\]]+)\]\]|\[([A-Z][a-z]+(?:[A-Z][a-z]+)+)\]";
-        var matches = Regex.Matches(content, wikiWordPattern);
+        // Use syntax pattern from parent wiki
+        var syntax = (_wiki?.Syntax ?? new WikidPadSyntax()) as WikidPadSyntax;
+        var matches = syntax.LinkPattern.Matches(content);
 
         foreach (Match match in matches)
         {
@@ -58,9 +60,11 @@ public class WikidpadPage : LocalPage
         var tags = new List<string>();
         var content = GetContent();
 
+        // Use syntax patterns from parent wiki
+        var syntax = (_wiki?.Syntax ?? new WikidPadSyntax()) as WikidPadSyntax;
+
         // Match WikidPad tags: [tag:tagname]
-        var tagPattern = @"\[tag:([^\]]+)\]";
-        var matches = Regex.Matches(content, tagPattern);
+        var matches = syntax.TagPattern.Matches(content);
 
         foreach (Match match in matches)
         {
@@ -71,9 +75,8 @@ public class WikidpadPage : LocalPage
             }
         }
 
-        // Match Category tags: CategoryTagName (words starting with "Category")
-        var categoryPattern = @"\bCategory([A-Z][a-zA-Z0-9]*)\b";
-        var categoryMatches = Regex.Matches(content, categoryPattern);
+        // Match Category tags: CategoryTagName
+        var categoryMatches = WikidPadSyntax.CategoryPattern.Matches(content);
 
         foreach (Match match in categoryMatches)
         {
@@ -97,15 +100,41 @@ public class WikidpadPage : LocalPage
         var headers = new List<string>();
         var content = GetContent();
 
-        // Match WikidPad headers: lines starting with +, ++, +++, etc.
-        var headerPattern = @"^\+{1,}\s*(.+)$";
-        var matches = Regex.Matches(content, headerPattern, RegexOptions.Multiline);
+        // Use syntax pattern from parent wiki
+        var syntax = (_wiki?.Syntax ?? new WikidPadSyntax()) as WikidPadSyntax;
+        var matches = syntax.HeaderPattern.Matches(content);
 
         foreach (Match match in matches)
         {
-            headers.Add(match.Groups[1].Value.Trim());
+            headers.Add(match.Groups[2].Value.Trim());
         }
 
         return headers;
+    }
+
+    public override Dictionary<string, string> GetAttributes()
+    {
+        if (ContentIsStale)
+        {
+            GetContent();
+        }
+
+        var attributes = new Dictionary<string, string>();
+        var content = GetContent();
+
+        // Use syntax pattern from parent wiki
+        var syntax = (_wiki?.Syntax ?? new WikidPadSyntax()) as WikidPadSyntax;
+        var matches = syntax.AttributePattern.Matches(content);
+
+        foreach (Match match in matches)
+        {
+            var key = match.Groups[1].Value.Trim();
+            var value = match.Groups[2].Value.Trim();
+
+            // Use key as-is (case-sensitive), but avoid duplicates by overwriting
+            attributes[key] = value;
+        }
+
+        return attributes;
     }
 }

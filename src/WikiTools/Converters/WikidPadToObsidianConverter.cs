@@ -10,6 +10,9 @@ public class WikidPadToObsidianConverter
     public string SourcePath { get; }
     public string DestinationPath { get; }
 
+    private readonly WikidpadWiki _sourceWiki;
+    private readonly WikidPadSyntax _sourceSyntax;
+
     public WikidPadToObsidianConverter(string sourcePath, string destinationPath)
     {
         if (!Directory.Exists(sourcePath))
@@ -19,6 +22,9 @@ public class WikidPadToObsidianConverter
 
         SourcePath = sourcePath;
         DestinationPath = destinationPath;
+
+        _sourceWiki = new WikidpadWiki(sourcePath);
+        _sourceSyntax = _sourceWiki.Syntax as WikidPadSyntax;
     }
 
     /// <summary>
@@ -32,8 +38,7 @@ public class WikidPadToObsidianConverter
             Directory.CreateDirectory(DestinationPath);
         }
 
-        var wiki = new WikidpadWiki(SourcePath);
-        var pages = wiki.GetAllPages();
+        var pages = _sourceWiki.GetAllPages();
 
         foreach (var page in pages)
         {
@@ -67,9 +72,10 @@ public class WikidPadToObsidianConverter
         }
 
         // Apply conversions in order
-        // IMPORTANT: Tags must be converted before links to prevent [tag:...] from being treated as links
+        // IMPORTANT: Tags and attributes must be converted before links to prevent [tag:...] and [attr:...] from being treated as links
         content = ConvertHeaders(content);
         content = ConvertTags(content);
+        content = ConvertAttributes(content);
         content = ConvertLinks(content);
 
         return content;
@@ -80,17 +86,15 @@ public class WikidPadToObsidianConverter
     /// </summary>
     private string ConvertHeaders(string content)
     {
-        // Match lines starting with +, ++, +++, etc.
-        var headerPattern = @"^(\+{1,})\s*(.+)$";
-
-        return Regex.Replace(content, headerPattern, match =>
+        // Use WikidPad syntax pattern for headers
+        return _sourceSyntax.HeaderPattern.Replace(content, match =>
         {
             var plusCount = match.Groups[1].Value.Length;
             var headerText = match.Groups[2].Value.Trim();
             var hashes = new string('#', plusCount);
 
             return $"{hashes} {headerText}";
-        }, RegexOptions.Multiline);
+        });
     }
 
     /// <summary>
@@ -104,27 +108,16 @@ public class WikidPadToObsidianConverter
     private string ConvertLinks(string content)
     {
         // First: Convert [single bracket links] to [[double brackets]]
-        // This handles [Link with Spaces] and [any other text]
-        // Negative lookbehind (?<!\[) ensures we don't match [ in [[...]]
-        // Negative lookahead (?!\]) ensures we don't match ] in ...]]
-        var singleBracketPattern = @"(?<!\[)\[([^\]]+)\](?!\])";
-        content = Regex.Replace(content, singleBracketPattern, match =>
+        // Use WikidPad syntax pattern for single bracket links
+        content = WikidPadSyntax.SingleBracketLinkPattern.Replace(content, match =>
         {
             var linkText = match.Groups[1].Value;
             return $"[[{linkText}]]";
         });
 
         // Second: Convert bare CamelCase WikiWords to [[WikiWord]]
-        // A WikiWord in WikidPad must have mixed case (at least one uppercase and one lowercase)
-        // and at least 2 case transitions (e.g., Ab -> C, or AB -> c -> D)
-        // Examples: WikiWord, AbC, ABcd, AbcD, ABcD, AbCDe, WikiWord123
-        // We need to match: letter sequences with at least one uppercase, one lowercase, and another different case
-        // Negative lookbehind (?<!\[) prevents matching if preceded by [
-        // Negative lookahead (?!\]) prevents matching if followed by ]
-        // This pattern matches any word that has at least one lowercase letter followed by an uppercase,
-        // OR at least two uppercase with a lowercase somewhere
-        var camelCasePattern = @"(?<!\[)\b([A-Z]*[a-z]+[A-Z][A-Za-z0-9]*|[A-Z]{2,}[a-z][A-Za-z0-9]*)\b(?!\])";
-        content = Regex.Replace(content, camelCasePattern, match =>
+        // Use WikidPad syntax pattern for CamelCase links
+        content = WikidPadSyntax.CamelCaseLinkPattern.Replace(content, match =>
         {
             return $"[[{match.Value}]]";
         });
@@ -138,8 +131,8 @@ public class WikidPadToObsidianConverter
     private string ConvertTags(string content)
     {
         // Convert [tag:tagname] to #tagname with space after
-        var tagPattern = @"\[tag:([^\]]+)\]";
-        content = Regex.Replace(content, tagPattern, match =>
+        // Use WikidPad syntax pattern for tags
+        content = _sourceSyntax.TagPattern.Replace(content, match =>
         {
             var tagName = match.Groups[1].Value.Trim();
             // Replace spaces in tag names with hyphens for Obsidian compatibility
@@ -148,8 +141,8 @@ public class WikidPadToObsidianConverter
         });
 
         // Convert CategoryTagName to #TagName
-        var categoryPattern = @"\bCategory([A-Z][a-zA-Z0-9]*)\b";
-        content = Regex.Replace(content, categoryPattern, match =>
+        // Use WikidPad syntax pattern for category tags
+        content = WikidPadSyntax.CategoryPattern.Replace(content, match =>
         {
             var tagName = match.Groups[1].Value;
             return $"#{tagName}";
@@ -161,5 +154,22 @@ public class WikidPadToObsidianConverter
         content = Regex.Replace(content, @" +$", ""); // Remove trailing spaces at end of content
 
         return content;
+    }
+
+    /// <summary>
+    /// Convert WikidPad attributes to Obsidian inline attributes
+    /// WikidPad syntax: [key: value]
+    /// Obsidian syntax: [key:: value]
+    /// </summary>
+    private string ConvertAttributes(string content)
+    {
+        // Convert [key: value] to [key:: value]
+        // Use WikidPad syntax pattern for attributes
+        return _sourceSyntax.AttributePattern.Replace(content, match =>
+        {
+            var key = match.Groups[1].Value.Trim();
+            var value = match.Groups[2].Value.Trim();
+            return $"[{key}:: {value}]";
+        });
     }
 }

@@ -6,6 +6,13 @@ namespace WikiTools;
 
 public class ObsidianWiki : LocalWiki
 {
+    private ObsidianSyntax _syntax;
+
+    /// <summary>
+    /// Gets the Obsidian syntax definition
+    /// </summary>
+    public override WikiSyntax Syntax => _syntax ??= new ObsidianSyntax();
+
     public ObsidianWiki(string rootPath) : base(rootPath)
     {
         FileExtension = ".md";
@@ -18,7 +25,7 @@ public class ObsidianWiki : LocalWiki
 
         foreach (var file in files)
         {
-            pages.Add(new ObsidianPage(file));
+            pages.Add(new ObsidianPage(file, this));
         }
 
         return pages;

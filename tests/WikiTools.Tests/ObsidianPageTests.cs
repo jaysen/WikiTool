@@ -173,4 +173,155 @@ aliases: [""Alias One"", ""Alias Two""]
         // Assert
         Assert.Equal(expected, actual);
     }
+
+    [Fact]
+    public void GetAttributes_ParsesInlineAttributes()
+    {
+        // Arrange
+        var path = Path.Combine(_testFolder, "attributes_inline_test.md");
+        var content = "Some text [author:: John Doe] more text [status:: draft]";
+        File.WriteAllText(path, content);
+
+        // Act
+        var wiki = new ObsidianWiki(_testFolder);
+        var sut = new ObsidianPage(path, wiki);
+        var attributes = sut.GetAttributes();
+
+        // Assert
+        Assert.Equal(2, attributes.Count);
+        Assert.Equal("John Doe", attributes["author"]);
+        Assert.Equal("draft", attributes["status"]);
+    }
+
+    [Fact]
+    public void GetAttributes_ParsesYamlFrontmatterAttributes()
+    {
+        // Arrange
+        var path = Path.Combine(_testFolder, "attributes_yaml_test.md");
+        var content = @"---
+author: John Doe
+status: draft
+date: 2024-01-15
+---
+Content here";
+        File.WriteAllText(path, content);
+
+        // Act
+        var wiki = new ObsidianWiki(_testFolder);
+        var sut = new ObsidianPage(path, wiki);
+        var attributes = sut.GetAttributes();
+
+        // Assert
+        Assert.Equal(3, attributes.Count);
+        Assert.Equal("John Doe", attributes["author"]);
+        Assert.Equal("draft", attributes["status"]);
+        Assert.Equal("2024-01-15", attributes["date"]);
+    }
+
+    [Fact]
+    public void GetAttributes_ParsesBothInlineAndYaml()
+    {
+        // Arrange
+        var path = Path.Combine(_testFolder, "attributes_combined_test.md");
+        var content = @"---
+yaml-attr: from yaml
+---
+Content [inline-attr:: from inline]";
+        File.WriteAllText(path, content);
+
+        // Act
+        var wiki = new ObsidianWiki(_testFolder);
+        var sut = new ObsidianPage(path, wiki);
+        var attributes = sut.GetAttributes();
+
+        // Assert
+        Assert.Equal(2, attributes.Count);
+        Assert.Equal("from yaml", attributes["yaml-attr"]);
+        Assert.Equal("from inline", attributes["inline-attr"]);
+    }
+
+    [Fact]
+    public void GetAttributes_SkipsTagsAndAliasesInYaml()
+    {
+        // Arrange
+        var path = Path.Combine(_testFolder, "attributes_yaml_skip_test.md");
+        var content = @"---
+tags: [tag1, tag2]
+aliases: [alias1]
+author: John
+---
+Content";
+        File.WriteAllText(path, content);
+
+        // Act
+        var wiki = new ObsidianWiki(_testFolder);
+        var sut = new ObsidianPage(path, wiki);
+        var attributes = sut.GetAttributes();
+
+        // Assert
+        Assert.Equal(1, attributes.Count);
+        Assert.Equal("John", attributes["author"]);
+        Assert.False(attributes.ContainsKey("tags"));
+        Assert.False(attributes.ContainsKey("aliases"));
+    }
+
+    [Fact]
+    public void GetAttributes_ReturnsEmptyWhenNoAttributes()
+    {
+        // Arrange
+        var path = Path.Combine(_testFolder, "attributes_empty_test.md");
+        var content = "Just some plain text";
+        File.WriteAllText(path, content);
+
+        // Act
+        var wiki = new ObsidianWiki(_testFolder);
+        var sut = new ObsidianPage(path, wiki);
+        var attributes = sut.GetAttributes();
+
+        // Assert
+        Assert.Equal(0, attributes.Count);
+    }
+
+    [Fact]
+    public void GetAttributes_CleansUpArrayValues()
+    {
+        // Arrange
+        var path = Path.Combine(_testFolder, "attributes_array_test.md");
+        var content = @"---
+categories: [cat1, cat2]
+---
+Content";
+        File.WriteAllText(path, content);
+
+        // Act
+        var wiki = new ObsidianWiki(_testFolder);
+        var sut = new ObsidianPage(path, wiki);
+        var attributes = sut.GetAttributes();
+
+        // Assert
+        Assert.Equal(1, attributes.Count);
+        Assert.Equal("cat1, cat2", attributes["categories"]);
+    }
+
+    [Fact]
+    public void GetAttributes_YamlOverridesInlineForSameKey()
+    {
+        // Arrange
+        var path = Path.Combine(_testFolder, "attributes_override_test.md");
+        var content = @"---
+status: yaml
+---
+Content [status:: inline]";
+        File.WriteAllText(path, content);
+
+        // Act
+        var wiki = new ObsidianWiki(_testFolder);
+        var sut = new ObsidianPage(path, wiki);
+        var attributes = sut.GetAttributes();
+
+        // Assert
+        Assert.Equal(1, attributes.Count);
+        // Inline is processed first, then YAML overwrites it
+        Assert.Equal("yaml", attributes["status"]);
+    }
 }

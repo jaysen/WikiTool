@@ -7,6 +7,14 @@ namespace WikiTools;
 public class WikidpadWiki : LocalWiki
 {
     public readonly string DataDir;
+
+    private WikidPadSyntax _syntax;
+
+    /// <summary>
+    /// Gets the WikidPad syntax definition
+    /// </summary>
+    public override WikiSyntax Syntax => _syntax ??= new WikidPadSyntax();
+
     public WikidpadWiki(string rootPath) : base(rootPath)
     {
         DataDir = Path.Combine(rootPath, "data");
@@ -24,7 +32,7 @@ public class WikidpadWiki : LocalWiki
         var pages = new List<Page>();
         foreach (var file in files)
         {
-            pages.Add(new WikidpadPage(file));
+            pages.Add(new WikidpadPage(file, this));
         }
         return pages;
     }

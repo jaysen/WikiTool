@@ -400,6 +400,127 @@ Some text with [tag:example] and also a CategoryTest entry.
         Assert.Contains("#Test", result);
     }
 
+    [Fact]
+    public void ConvertAttributes_SingleColon_ToDoubleColon()
+    {
+        // Arrange
+        var content = "Some text [author: John Doe] more text";
+        var converter = CreateConverter();
+
+        // Act
+        var result = converter.ConvertContent(content);
+
+        // Assert
+        Assert.Contains("[author:: John Doe]", result);
+        Assert.DoesNotContain("[author: John Doe]", result);
+    }
+
+    [Fact]
+    public void ConvertAttributes_MultipleAttributes_AllConverted()
+    {
+        // Arrange
+        var content = "[author: John] [status: draft] [date: 2024-01-15]";
+        var converter = CreateConverter();
+
+        // Act
+        var result = converter.ConvertContent(content);
+
+        // Assert
+        Assert.Contains("[author:: John]", result);
+        Assert.Contains("[status:: draft]", result);
+        Assert.Contains("[date:: 2024-01-15]", result);
+    }
+
+    [Fact]
+    public void ConvertAttributes_WithHyphens_ConvertsCorrectly()
+    {
+        // Arrange
+        var content = "[created-date: 2024-01-15] [author-name: John]";
+        var converter = CreateConverter();
+
+        // Act
+        var result = converter.ConvertContent(content);
+
+        // Assert
+        Assert.Contains("[created-date:: 2024-01-15]", result);
+        Assert.Contains("[author-name:: John]", result);
+    }
+
+    [Fact]
+    public void ConvertAttributes_WithNumbers_ConvertsCorrectly()
+    {
+        // Arrange
+        var content = "[version: 1.0.0] [build123: latest]";
+        var converter = CreateConverter();
+
+        // Act
+        var result = converter.ConvertContent(content);
+
+        // Assert
+        Assert.Contains("[version:: 1.0.0]", result);
+        Assert.Contains("[build123:: latest]", result);
+    }
+
+    [Fact]
+    public void ConvertAttributes_LongValue_PreservesSpaces()
+    {
+        // Arrange
+        var content = "[description: This is a long description with spaces]";
+        var converter = CreateConverter();
+
+        // Act
+        var result = converter.ConvertContent(content);
+
+        // Assert
+        Assert.Contains("[description:: This is a long description with spaces]", result);
+    }
+
+    [Fact]
+    public void ConvertContent_AttributesAndTagsAndLinks_AllConvertedInOrder()
+    {
+        // Arrange
+        var content = @"+ Header
+[tag:important]
+[author: John]
+Some WikiWord and [single link]
+[status: draft]";
+        var converter = CreateConverter();
+
+        // Act
+        var result = converter.ConvertContent(content);
+
+        // Assert
+        // Headers converted
+        Assert.Contains("# Header", result);
+
+        // Tags converted
+        Assert.Contains("#important", result);
+
+        // Attributes converted (not confused with tags)
+        Assert.Contains("[author:: John]", result);
+        Assert.Contains("[status:: draft]", result);
+
+        // Links converted
+        Assert.Contains("[[WikiWord]]", result);
+        Assert.Contains("[[single link]]", result);
+    }
+
+    [Fact]
+    public void ConvertAttributes_DoesNotConvertTags()
+    {
+        // Arrange - Tags should be converted by ConvertTags, not ConvertAttributes
+        var content = "[tag:mytag]";
+        var converter = CreateConverter();
+
+        // Act
+        var result = converter.ConvertContent(content);
+
+        // Assert
+        // Tag should be converted to # format, not [tag:: format]
+        Assert.Contains("#mytag", result);
+        Assert.DoesNotContain("[tag::", result);
+    }
+
     private WikidPadToObsidianConverter CreateConverter()
     {
         Directory.CreateDirectory(_sourceDir);

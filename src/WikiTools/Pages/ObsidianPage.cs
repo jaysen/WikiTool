@@ -6,13 +6,16 @@ namespace WikiTools;
 
 public class ObsidianPage : LocalPage
 {
-    public ObsidianPage(string location) : base(location)
+    private ObsidianWiki _wiki;
+
+    public ObsidianPage(string location, ObsidianWiki wiki = null) : base(location)
     {
         var ext = System.IO.Path.GetExtension(location);
         if (ext != ".md")
         {
             throw new FormatException("This is not a path to a .md page");
         }
+        _wiki = wiki;
     }
 
     public override List<string> GetLinks()
@@ -23,9 +26,11 @@ public class ObsidianPage : LocalPage
         }
 
         var links = new List<string>();
-        // Match Obsidian wikilinks: [[link]] or [[link|display]]
-        var linkPattern = @"\[\[([^\]|]+)(?:\|[^\]]*)?\]\]";
-        var matches = Regex.Matches(GetContent(), linkPattern);
+        var content = GetContent();
+
+        // Use syntax pattern from parent wiki
+        var syntax = (_wiki?.Syntax ?? new ObsidianSyntax()) as ObsidianSyntax;
+        var matches = syntax.LinkPattern.Matches(content);
 
         foreach (Match match in matches)
         {
@@ -45,15 +50,16 @@ public class ObsidianPage : LocalPage
         var aliases = new List<string>();
         var content = GetContent();
 
+        // Use syntax patterns from parent wiki
+        var syntax = (_wiki?.Syntax ?? new ObsidianSyntax()) as ObsidianSyntax;
+
         // Check for YAML frontmatter aliases
-        var yamlPattern = @"^---\s*\n(.*?)\n---";
-        var yamlMatch = Regex.Match(content, yamlPattern, RegexOptions.Singleline);
+        var yamlMatch = ObsidianSyntax.YamlPattern.Match(content);
 
         if (yamlMatch.Success)
         {
             var frontmatter = yamlMatch.Groups[1].Value;
-            var aliasPattern = @"aliases:\s*\[([^\]]+)\]";
-            var aliasMatch = Regex.Match(frontmatter, aliasPattern);
+            var aliasMatch = syntax.AliasPattern.Match(frontmatter);
 
             if (aliasMatch.Success)
             {
@@ -79,9 +85,11 @@ public class ObsidianPage : LocalPage
         var tags = new List<string>();
         var content = GetContent();
 
-        // Match inline tags: #tagname (but not in code blocks)
-        var tagPattern = @"(?:^|\s)#([a-zA-Z0-9_-]+)";
-        var matches = Regex.Matches(content, tagPattern, RegexOptions.Multiline);
+        // Use syntax patterns from parent wiki
+        var syntax = (_wiki?.Syntax ?? new ObsidianSyntax()) as ObsidianSyntax;
+
+        // Match inline tags: #tagname
+        var matches = syntax.TagPattern.Matches(content);
 
         foreach (Match match in matches)
         {
@@ -93,14 +101,12 @@ public class ObsidianPage : LocalPage
         }
 
         // Also check YAML frontmatter
-        var yamlPattern = @"^---\s*\n(.*?)\n---";
-        var yamlMatch = Regex.Match(content, yamlPattern, RegexOptions.Singleline);
+        var yamlMatch = ObsidianSyntax.YamlPattern.Match(content);
 
         if (yamlMatch.Success)
         {
             var frontmatter = yamlMatch.Groups[1].Value;
-            var tagPattern2 = @"tags:\s*\[([^\]]+)\]";
-            var tagMatch = Regex.Match(frontmatter, tagPattern2);
+            var tagMatch = ObsidianSyntax.YamlTagPattern.Match(frontmatter);
 
             if (tagMatch.Success)
             {
@@ -130,9 +136,9 @@ public class ObsidianPage : LocalPage
         var headers = new List<string>();
         var content = GetContent();
 
-        // Match markdown headers: # Header, ## Header, etc.
-        var headerPattern = @"^(#+)\s+(.+)$";
-        var matches = Regex.Matches(content, headerPattern, RegexOptions.Multiline);
+        // Use syntax pattern from parent wiki
+        var syntax = (_wiki?.Syntax ?? new ObsidianSyntax()) as ObsidianSyntax;
+        var matches = syntax.HeaderPattern.Matches(content);
 
         foreach (Match match in matches)
         {
@@ -140,5 +146,63 @@ public class ObsidianPage : LocalPage
         }
 
         return headers;
+    }
+
+    public override Dictionary<string, string> GetAttributes()
+    {
+        if (ContentIsStale)
+        {
+            GetContent();
+        }
+
+        var attributes = new Dictionary<string, string>();
+        var content = GetContent();
+
+        // Use syntax pattern from parent wiki
+        var syntax = (_wiki?.Syntax ?? new ObsidianSyntax()) as ObsidianSyntax;
+
+        // First: Match inline attributes [key:: value]
+        var inlineMatches = syntax.AttributePattern.Matches(content);
+
+        foreach (Match match in inlineMatches)
+        {
+            var key = match.Groups[1].Value.Trim();
+            var value = match.Groups[2].Value.Trim();
+            attributes[key] = value;
+        }
+
+        // Second: Check YAML frontmatter for attributes
+        var yamlMatch = ObsidianSyntax.YamlPattern.Match(content);
+
+        if (yamlMatch.Success)
+        {
+            var frontmatter = yamlMatch.Groups[1].Value;
+
+            // Match all key-value pairs in frontmatter
+            var yamlAttrMatches = ObsidianSyntax.YamlAttributePattern.Matches(frontmatter);
+
+            foreach (Match match in yamlAttrMatches)
+            {
+                var key = match.Groups[1].Value.Trim();
+                var value = match.Groups[2].Value.Trim();
+
+                // Skip known special keys (tags and aliases are handled separately)
+                if (key == "tags" || key == "aliases")
+                    continue;
+
+                // Clean up array/list values if present
+                if (value.StartsWith("[") && value.EndsWith("]"))
+                {
+                    value = value.Trim('[', ']').Trim();
+                }
+
+                // Remove quotes if present
+                value = value.Trim('"', '\'');
+
+                attributes[key] = value;
+            }
+        }
+
+        return attributes;
     }
 }
