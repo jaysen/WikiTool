@@ -77,6 +77,15 @@ public class WikidPadToObsidianConverter
             return content;
         }
 
+        // Extract and preserve existing YAML frontmatter
+        string existingFrontmatter = null;
+        var yamlMatch = Regex.Match(content, @"^---\r?\n(.*?)\r?\n---\r?\n", RegexOptions.Singleline);
+        if (yamlMatch.Success)
+        {
+            existingFrontmatter = yamlMatch.Value;
+            content = content.Substring(yamlMatch.Length);
+        }
+
         // Extract aliases first (they need to go in YAML frontmatter)
         var aliases = ExtractAliases(content);
         content = RemoveAliases(content);
@@ -88,10 +97,16 @@ public class WikidPadToObsidianConverter
         content = ConvertAttributes(content);
         content = ConvertLinks(content);
 
-        // Add YAML frontmatter if we have aliases
+        // Restore existing frontmatter if it was present
+        if (existingFrontmatter != null)
+        {
+            content = existingFrontmatter + content;
+        }
+
+        // Add or merge aliases into YAML frontmatter if we have aliases
         if (aliases.Count > 0)
         {
-            content = GenerateYamlFrontmatter(aliases) + content;
+            content = AddOrMergeYamlFrontmatter(content, aliases);
         }
 
         return content;
@@ -222,6 +237,74 @@ public class WikidPadToObsidianConverter
         // Clean up any leftover empty lines at the start
         content = Regex.Replace(content, @"^\s*\n", "", RegexOptions.Multiline);
         return content.TrimStart();
+    }
+
+    /// <summary>
+    /// Add or merge aliases into YAML frontmatter
+    /// </summary>
+    private static string AddOrMergeYamlFrontmatter(string content, List<string> aliases)
+    {
+        if (aliases.Count == 0)
+        {
+            return content;
+        }
+
+        // Check if content already has YAML frontmatter
+        var yamlMatch = Regex.Match(content, @"^---\r?\n(.*?)\r?\n---\r?\n", RegexOptions.Singleline);
+
+        if (yamlMatch.Success)
+        {
+            // Content has existing frontmatter - merge aliases into it
+            var existingYaml = yamlMatch.Groups[1].Value;
+            var contentAfterYaml = content.Substring(yamlMatch.Length);
+
+            // Check if aliases already exist in frontmatter
+            var aliasesMatch = Regex.Match(existingYaml, @"^aliases:\s*$", RegexOptions.Multiline);
+
+            if (aliasesMatch.Success)
+            {
+                // Aliases section exists - append to it
+                // Find where the aliases section ends (next top-level key or end of YAML)
+                var aliasesEndMatch = Regex.Match(existingYaml.Substring(aliasesMatch.Index + aliasesMatch.Length),
+                    @"^[a-zA-Z]", RegexOptions.Multiline);
+
+                var insertPosition = aliasesMatch.Index + aliasesMatch.Length;
+                if (aliasesEndMatch.Success)
+                {
+                    insertPosition += aliasesEndMatch.Index;
+                }
+                else
+                {
+                    insertPosition = existingYaml.Length;
+                }
+
+                var sb = new StringBuilder();
+                foreach (var alias in aliases)
+                {
+                    sb.AppendLine($"  - {alias}");
+                }
+
+                var updatedYaml = existingYaml.Insert(insertPosition, sb.ToString());
+                return $"---\n{updatedYaml}\n---\n{contentAfterYaml}";
+            }
+            else
+            {
+                // No aliases section - add it to the end of existing frontmatter
+                var sb = new StringBuilder();
+                sb.AppendLine(existingYaml.TrimEnd());
+                sb.AppendLine("aliases:");
+                foreach (var alias in aliases)
+                {
+                    sb.AppendLine($"  - {alias}");
+                }
+                return $"---\n{sb}---\n{contentAfterYaml}";
+            }
+        }
+        else
+        {
+            // No existing frontmatter - create new one
+            return GenerateYamlFrontmatter(aliases) + content;
+        }
     }
 
     /// <summary>

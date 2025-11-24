@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Linq;
 using WikiTools.Converters;
 using Xunit;
@@ -723,6 +724,261 @@ Some WikiWord here";
         Assert.Contains("[[WikiWord]]", result);
         // Alias tag removed from content
         Assert.DoesNotContain("[alias:", result);
+    }
+
+    [Fact]
+    public void ConvertAliases_WithExistingFrontmatter_MergesIntoExisting()
+    {
+        // Arrange - content already has frontmatter with other properties
+        var content = @"---
+title: My Page
+tags: [important]
+---
+[alias:PageAlias]
++ Header
+Content here";
+        var converter = CreateConverter();
+
+        // Act
+        var result = converter.ConvertContent(content);
+
+        // Assert - should have single frontmatter block with all properties
+        var frontmatterCount = Regex.Matches(result, "^---$", RegexOptions.Multiline).Count;
+        Assert.Equal(2, frontmatterCount); // Only one opening and one closing ---
+
+        Assert.Contains("title: My Page", result);
+        Assert.Contains("tags: [important]", result);
+        Assert.Contains("aliases:", result);
+        Assert.Contains("  - PageAlias", result);
+        Assert.DoesNotContain("[alias:", result);
+    }
+
+    [Fact]
+    public void ConvertAliases_WithExistingAliasesInFrontmatter_AppendsToExisting()
+    {
+        // Arrange - content already has aliases in frontmatter
+        var content = @"---
+aliases:
+  - ExistingAlias
+---
+[alias:NewAlias]
++ Header
+Content here";
+        var converter = CreateConverter();
+
+        // Act
+        var result = converter.ConvertContent(content);
+
+        // Assert - should preserve existing alias and add new one
+        var frontmatterCount = Regex.Matches(result, "^---$", RegexOptions.Multiline).Count;
+        Assert.Equal(2, frontmatterCount);
+
+        Assert.Contains("  - ExistingAlias", result);
+        Assert.Contains("  - NewAlias", result);
+        Assert.DoesNotContain("[alias:", result);
+    }
+
+    [Fact]
+    public void ConvertAliases_WithExistingAliasesAndOtherProperties_MaintainsOrder()
+    {
+        // Arrange - frontmatter has aliases in middle of other properties
+        var content = @"---
+title: Test
+aliases:
+  - FirstAlias
+author: John
+---
+[alias:SecondAlias]
++ Header";
+        var converter = CreateConverter();
+
+        // Act
+        var result = converter.ConvertContent(content);
+
+        // Assert - should preserve structure and add new alias to aliases section
+        Assert.Contains("title: Test", result);
+        Assert.Contains("aliases:", result);
+        Assert.Contains("  - FirstAlias", result);
+        Assert.Contains("  - SecondAlias", result);
+        Assert.Contains("author: John", result);
+
+        // Verify aliases section is not duplicated
+        var aliasesKeyCount = Regex.Matches(result, "^aliases:", RegexOptions.Multiline).Count;
+        Assert.Equal(1, aliasesKeyCount);
+    }
+
+    [Fact]
+    public void ConvertAliases_WithNoExistingFrontmatter_CreatesNew()
+    {
+        // Arrange - no existing frontmatter (same as existing test but explicit)
+        var content = "[alias:MyAlias]\n+ Header\nContent";
+        var converter = CreateConverter();
+
+        // Act
+        var result = converter.ConvertContent(content);
+
+        // Assert - should create frontmatter from scratch
+        Assert.StartsWith("---", result);
+        Assert.Contains("aliases:", result);
+        Assert.Contains("  - MyAlias", result);
+        var frontmatterCount = Regex.Matches(result, "^---$", RegexOptions.Multiline).Count;
+        Assert.Equal(2, frontmatterCount);
+    }
+
+    [Fact]
+    public void ConvertAliases_WithMultipleAliasesAndExistingFrontmatter_AllMerged()
+    {
+        // Arrange
+        var content = @"---
+title: Test Page
+---
+[alias:FirstAlias] [alias:SecondAlias] [alias:ThirdAlias]
++ Header";
+        var converter = CreateConverter();
+
+        // Act
+        var result = converter.ConvertContent(content);
+
+        // Assert
+        Assert.Contains("title: Test Page", result);
+        Assert.Contains("aliases:", result);
+        Assert.Contains("  - FirstAlias", result);
+        Assert.Contains("  - SecondAlias", result);
+        Assert.Contains("  - ThirdAlias", result);
+
+        // Single frontmatter block
+        var frontmatterCount = Regex.Matches(result, "^---$", RegexOptions.Multiline).Count;
+        Assert.Equal(2, frontmatterCount);
+    }
+
+    [Fact]
+    public void ConvertAliases_WithComplexFrontmatter_PreservesStructure()
+    {
+        // Arrange - complex frontmatter with nested structures
+        var content = @"---
+title: Complex Page
+tags: [tag1, tag2]
+metadata:
+  author: John Doe
+  date: 2024-01-15
+---
+[alias:ComplexAlias]
++ Content";
+        var converter = CreateConverter();
+
+        // Act
+        var result = converter.ConvertContent(content);
+
+        // Assert - all existing properties preserved
+        Assert.Contains("title: Complex Page", result);
+        Assert.Contains("tags: [tag1, tag2]", result);
+        Assert.Contains("metadata:", result);
+        Assert.Contains("  author: John Doe", result);
+        Assert.Contains("  date: 2024-01-15", result);
+        Assert.Contains("aliases:", result);
+        Assert.Contains("  - ComplexAlias", result);
+    }
+
+    [Fact]
+    public void ConvertAll_WithFrontmatterAndAliases_ConvertsCorrectly()
+    {
+        // Arrange - Create a real file with frontmatter and aliases
+        Directory.CreateDirectory(_sourceDir);
+        var dataDir = Path.Combine(_sourceDir, "data");
+        Directory.CreateDirectory(dataDir);
+
+        var testContent = @"---
+title: My Wiki Page
+author: John Doe
+tags: [documentation, reference]
+created: 2024-01-15
+---
+[alias:MyPageAlias] [alias:SecondAlias]
+
++ Introduction
+
+This is a test page with existing frontmatter and aliases.
+
+++ Features
+
+The page demonstrates:
+- Existing frontmatter properties
+- Multiple alias tags
+- [tag:important] content
+- Links to OtherPage and [Another Page]
+- [status: draft] attribute
+
+++ CamelCase Links
+
+Some WikiWord links and ProjectNotes references.
+
++++ Details
+
+More detailed information with [priority: high] attribute.
+";
+
+        File.WriteAllText(Path.Combine(dataDir, "PageWithFrontmatter.wiki"), testContent);
+
+        if (Directory.Exists(_destDir))
+        {
+            Directory.Delete(_destDir, true);
+        }
+
+        var converter = new WikidPadToObsidianConverter(_sourceDir, _destDir);
+
+        // Act
+        converter.ConvertAll();
+
+        // Assert
+        var mdFile = Path.Combine(_destDir, "PageWithFrontmatter.md");
+        Assert.True(File.Exists(mdFile), "Converted markdown file should exist");
+
+        var result = File.ReadAllText(mdFile);
+
+        // Verify single frontmatter block
+        var frontmatterCount = Regex.Matches(result, "^---$", RegexOptions.Multiline).Count;
+        Assert.Equal(2, frontmatterCount);
+
+        // Verify original frontmatter properties preserved
+        Assert.Contains("title: My Wiki Page", result);
+        Assert.Contains("author: John Doe", result);
+        Assert.Contains("tags: [documentation, reference]", result);
+        Assert.Contains("created: 2024-01-15", result);
+
+        // Verify aliases merged into frontmatter
+        Assert.Contains("aliases:", result);
+        Assert.Contains("  - MyPageAlias", result);
+        Assert.Contains("  - SecondAlias", result);
+
+        // Verify [alias:...] tags removed from content
+        Assert.DoesNotContain("[alias:", result);
+
+        // Verify headers converted
+        Assert.Contains("# Introduction", result);
+        Assert.Contains("## Features", result);
+        Assert.Contains("## [[CamelCase]] Links", result); // CamelCase gets converted to link
+        Assert.Contains("### Details", result);
+
+        // Verify tags converted
+        Assert.Contains("#important", result);
+        Assert.DoesNotContain("[tag:", result);
+
+        // Verify attributes converted
+        Assert.Contains("[status:: draft]", result);
+        Assert.Contains("[priority:: high]", result);
+        Assert.DoesNotContain("[status: draft]", result);
+        Assert.DoesNotContain("[priority: high]", result);
+
+        // Verify links converted
+        Assert.Contains("[[OtherPage]]", result);
+        Assert.Contains("[[Another Page]]", result);
+        Assert.Contains("[[WikiWord]]", result);
+        Assert.Contains("[[ProjectNotes]]", result);
+
+        // Verify structure: frontmatter at top, then content
+        Assert.StartsWith("---", result);
+        var contentAfterFrontmatter = result.Substring(result.IndexOf("---", 4) + 4);
+        Assert.Contains("# Introduction", contentAfterFrontmatter);
     }
 
     #endregion
