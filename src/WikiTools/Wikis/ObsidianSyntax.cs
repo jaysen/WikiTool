@@ -10,8 +10,9 @@ public partial class ObsidianSyntax : WikiSyntax
 {
     /// <summary>
     /// Pattern for matching Obsidian wikilinks: [[link]] or [[link|display]]
+    /// Excludes newlines to prevent matching malformed patterns (missing closing bracket)
     /// </summary>
-    [GeneratedRegex(@"\[\[([^\]|]+)(?:\|[^\]]*)?\]\]")]
+    [GeneratedRegex(@"\[\[([^\]|\r\n]+)(?:\|[^\]\r\n]*)?\]\]")]
     private static partial Regex LinkPatternRegex();
     public override Regex LinkPattern => LinkPatternRegex();
 
@@ -32,15 +33,17 @@ public partial class ObsidianSyntax : WikiSyntax
 
     /// <summary>
     /// Pattern for matching tags in YAML frontmatter: tags: [tag1, tag2]
+    /// Excludes newlines to prevent matching malformed patterns (missing closing bracket)
     /// </summary>
-    [GeneratedRegex(@"tags:\s*\[([^\]]+)\]")]
+    [GeneratedRegex(@"tags:\s*\[([^\]\r\n]+)\]")]
     private static partial Regex YamlTagPatternRegex();
     public static Regex YamlTagPattern => YamlTagPatternRegex();
 
     /// <summary>
     /// Pattern for matching aliases in YAML frontmatter: aliases: [alias1, alias2]
+    /// Excludes newlines to prevent matching malformed patterns (missing closing bracket)
     /// </summary>
-    [GeneratedRegex(@"aliases:\s*\[([^\]]+)\]")]
+    [GeneratedRegex(@"aliases:\s*\[([^\]\r\n]+)\]")]
     private static partial Regex AliasPatternRegex();
     public override Regex AliasPattern => AliasPatternRegex();
 
@@ -54,8 +57,9 @@ public partial class ObsidianSyntax : WikiSyntax
     /// <summary>
     /// Pattern for matching inline Obsidian/Dataview attributes: [key:: value]
     /// Captures both the attribute name (key) and value
+    /// Excludes newlines to prevent matching malformed patterns (missing closing bracket)
     /// </summary>
-    [GeneratedRegex(@"\[([a-zA-Z0-9_-]+)::\s*([^\]]+)\]")]
+    [GeneratedRegex(@"\[([a-zA-Z0-9_-]+)::\s*([^\]\r\n]+)\]")]
     private static partial Regex AttributePatternRegex();
     public override Regex AttributePattern => AttributePatternRegex();
 
