@@ -63,7 +63,7 @@ public class WikidPadToObsidianConverterTests
     }
 
     [Fact]
-    public void ConvertTags_CategoryFormat_ToObsidianHash()
+    public void ConvertTags_CategoryFormat_NotConvertedByDefault()
     {
         // Arrange
         var content = "CategoryTests and more content";
@@ -72,8 +72,25 @@ public class WikidPadToObsidianConverterTests
         // Act
         var result = converter.ConvertContent(content);
 
+        // Assert - Category tags are NOT converted by default
+        Assert.Contains("CategoryTests", result);
+        Assert.DoesNotContain("#Tests", result);
+    }
+
+    [Fact]
+    public void ConvertTags_CategoryFormat_ConvertedWhenEnabled()
+    {
+        // Arrange
+        var content = "CategoryTests and more content";
+        var converter = CreateConverter();
+        converter.ConvertCategoryTags = true;
+
+        // Act
+        var result = converter.ConvertContent(content);
+
         // Assert
         Assert.Contains("#Tests", result);
+        Assert.DoesNotContain("CategoryTests", result);
     }
 
     [Fact]
@@ -96,6 +113,7 @@ public class WikidPadToObsidianConverterTests
         // Arrange
         var content = "start [tag:one][tag:two]CategoryThree [tag:four] and continue";
         var converter = CreateConverter();
+        converter.ConvertCategoryTags = true;
 
         // Act
         var result = converter.ConvertContent(content);
@@ -216,6 +234,7 @@ Some content here [tag:testing] and CategoryExample.
 More details with bare CamelCase words.";
 
         var converter = CreateConverter();
+        converter.ConvertCategoryTags = true;
 
         // Act
         var result = converter.ConvertContent(content);
@@ -347,6 +366,7 @@ Some text with [tag:example] and also a CategoryTest entry.
 ";
 
         var converter = CreateConverter();
+        converter.ConvertCategoryTags = true;
 
         // Act
         var result = converter.ConvertContent(content);

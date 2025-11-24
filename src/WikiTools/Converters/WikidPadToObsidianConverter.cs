@@ -10,6 +10,12 @@ public class WikidPadToObsidianConverter
     public string SourcePath { get; }
     public string DestinationPath { get; }
 
+    /// <summary>
+    /// When true, converts WikidPad CategoryName patterns to #Name tags.
+    /// Default is false (CategoryName is left unchanged).
+    /// </summary>
+    public bool ConvertCategoryTags { get; set; } = false;
+
     private readonly WikidpadWiki _sourceWiki;
     private readonly WikidPadSyntax _sourceSyntax;
 
@@ -140,13 +146,15 @@ public class WikidPadToObsidianConverter
             return $"#{tagName} ";
         });
 
-        // Convert CategoryTagName to #TagName
-        // Use WikidPad syntax pattern for category tags
-        content = WikidPadSyntax.CategoryPattern.Replace(content, match =>
+        // Convert CategoryTagName to #TagName (only if enabled)
+        if (ConvertCategoryTags)
         {
-            var tagName = match.Groups[1].Value;
-            return $"#{tagName}";
-        });
+            content = WikidPadSyntax.CategoryPattern.Replace(content, match =>
+            {
+                var tagName = match.Groups[1].Value;
+                return $"#{tagName}";
+            });
+        }
 
         // Clean up any double spaces or trailing spaces at end of lines
         content = Regex.Replace(content, @" +", " "); // Replace multiple spaces with single space
