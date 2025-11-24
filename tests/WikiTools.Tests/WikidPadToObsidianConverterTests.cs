@@ -176,6 +176,27 @@ public class WikidPadToObsidianConverterTests
     }
 
     [Fact]
+    public void ConvertLinks_LowercaseCamelCase_NotConverted()
+    {
+        // Arrange - lowercase-starting CamelCase should NOT be converted (issue #3)
+        var content = "Test aaBB and aaBbbCcc and camelCase and iPhone here";
+        var converter = CreateConverter();
+
+        // Act
+        var result = converter.ConvertContent(content);
+
+        // Assert - these should remain unchanged (not converted to links)
+        Assert.Contains("aaBB", result);
+        Assert.Contains("aaBbbCcc", result);
+        Assert.Contains("camelCase", result);
+        Assert.Contains("iPhone", result);
+        Assert.DoesNotContain("[[aaBB]]", result);
+        Assert.DoesNotContain("[[aaBbbCcc]]", result);
+        Assert.DoesNotContain("[[camelCase]]", result);
+        Assert.DoesNotContain("[[iPhone]]", result);
+    }
+
+    [Fact]
     public void ConvertLinks_SingleBracketLink_ToDoubleSquareBrackets()
     {
         // Arrange

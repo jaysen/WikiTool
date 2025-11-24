@@ -106,6 +106,10 @@ public class WikidPadSyntaxTests
     [InlineData("UPPERCASE")]
     [InlineData("Ab")]
     [InlineData("A")]
+    [InlineData("aaBB")]           // lowercase start - not a WikiWord
+    [InlineData("aaBbbCcc")]       // lowercase start - not a WikiWord
+    [InlineData("camelCase")]      // lowercase start - not a WikiWord
+    [InlineData("iPhone")]         // lowercase start - not a WikiWord
     public void CamelCaseLinkPattern_DoesNotMatchInvalidWikiWords(string input)
     {
         // Arrange & Act

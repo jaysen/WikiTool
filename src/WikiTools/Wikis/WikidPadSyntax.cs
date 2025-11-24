@@ -20,10 +20,11 @@ public partial class WikidPadSyntax : WikiSyntax
 
     /// <summary>
     /// Pattern for matching bare CamelCase WikiWords (for conversion)
-    /// A WikiWord must have mixed case with at least 2 case transitions
+    /// A WikiWord must START with uppercase and have at least one case transition
     /// Examples: WikiWord, AbC, ABcd, AbcD, ABcD, AbCDe, WikiWord123
+    /// Does NOT match: aaBB, camelCase, iPhone (lowercase start)
     /// </summary>
-    [GeneratedRegex(@"(?<!\[)\b([A-Z]*[a-z]+[A-Z][A-Za-z0-9]*|[A-Z]{2,}[a-z][A-Za-z0-9]*)\b(?!\])")]
+    [GeneratedRegex(@"(?<!\[)\b([A-Z][a-z]+[A-Z][A-Za-z0-9]*|[A-Z]{2,}[a-z][A-Za-z0-9]*)\b(?!\])")]
     private static partial Regex CamelCaseLinkPatternRegex();
     public static Regex CamelCaseLinkPattern => CamelCaseLinkPatternRegex();
 
