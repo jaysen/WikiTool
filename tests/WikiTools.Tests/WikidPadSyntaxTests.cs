@@ -20,7 +20,7 @@ public class WikidPadSyntaxTests
         var matches = _syntax.LinkPattern.Matches(input);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("Link with spaces", matches[0].Groups[1].Value);
     }
 
@@ -34,7 +34,7 @@ public class WikidPadSyntaxTests
         var matches = _syntax.LinkPattern.Matches(input);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("WikiWord", matches[0].Groups[1].Value);
     }
 
@@ -49,7 +49,7 @@ public class WikidPadSyntaxTests
         var matches = _syntax.LinkPattern.Matches(input);
 
         // Assert
-        Assert.Equal(0, matches.Count);
+        Assert.Empty(matches);
     }
 
     [Fact]
@@ -63,7 +63,7 @@ public class WikidPadSyntaxTests
         var matches = _syntax.LinkPattern.Matches(input);
 
         // Assert
-        Assert.Equal(0, matches.Count);
+        Assert.Empty(matches);
     }
 
     [Fact]
@@ -97,7 +97,7 @@ public class WikidPadSyntaxTests
         var matches = WikidPadSyntax.CamelCaseLinkPattern.Matches(input);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal(input, matches[0].Value);
     }
 
@@ -112,7 +112,7 @@ public class WikidPadSyntaxTests
         var matches = WikidPadSyntax.CamelCaseLinkPattern.Matches(input);
 
         // Assert
-        Assert.Equal(0, matches.Count);
+        Assert.Empty(matches);
     }
 
     [Fact]
@@ -125,7 +125,7 @@ public class WikidPadSyntaxTests
         var matches = WikidPadSyntax.CamelCaseLinkPattern.Matches(input);
 
         // Assert
-        Assert.Equal(0, matches.Count);
+        Assert.Empty(matches);
     }
 
     [Fact]
@@ -155,7 +155,7 @@ public class WikidPadSyntaxTests
         var matches = WikidPadSyntax.SingleBracketLinkPattern.Matches(input);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("link text", matches[0].Groups[1].Value);
     }
 
@@ -169,7 +169,7 @@ public class WikidPadSyntaxTests
         var matches = WikidPadSyntax.SingleBracketLinkPattern.Matches(input);
 
         // Assert
-        Assert.Equal(0, matches.Count);
+        Assert.Empty(matches);
     }
 
     [Fact]
@@ -199,7 +199,7 @@ public class WikidPadSyntaxTests
         var matches = _syntax.TagPattern.Matches(input);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("important", matches[0].Groups[1].Value);
     }
 
@@ -213,7 +213,7 @@ public class WikidPadSyntaxTests
         var matches = _syntax.TagPattern.Matches(input);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("my important tag", matches[0].Groups[1].Value);
     }
 
@@ -244,7 +244,7 @@ public class WikidPadSyntaxTests
         var matches = WikidPadSyntax.CategoryPattern.Matches(input);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("Testing", matches[0].Groups[1].Value);
     }
 
@@ -258,7 +258,7 @@ public class WikidPadSyntaxTests
         var matches = WikidPadSyntax.CategoryPattern.Matches(input);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("Test123", matches[0].Groups[1].Value);
     }
 
@@ -272,7 +272,7 @@ public class WikidPadSyntaxTests
         var matches = WikidPadSyntax.CategoryPattern.Matches(input);
 
         // Assert
-        Assert.Equal(0, matches.Count);
+        Assert.Empty(matches);
     }
 
     [Fact]
@@ -303,7 +303,7 @@ public class WikidPadSyntaxTests
         var matches = _syntax.HeaderPattern.Matches(input);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal(expectedPlusCount, matches[0].Groups[1].Value.Length);
         Assert.Equal(expectedText, matches[0].Groups[2].Value);
     }
@@ -331,7 +331,7 @@ public class WikidPadSyntaxTests
         var matches = _syntax.HeaderPattern.Matches(input);
 
         // Assert
-        Assert.Equal(0, matches.Count);
+        Assert.Empty(matches);
     }
 
     #endregion
@@ -348,7 +348,7 @@ public class WikidPadSyntaxTests
         var matches = _syntax.AttributePattern.Matches(input);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("author", matches[0].Groups[1].Value);
         Assert.Equal("John Doe", matches[0].Groups[2].Value);
     }
@@ -363,7 +363,7 @@ public class WikidPadSyntaxTests
         var matches = _syntax.AttributePattern.Matches(input);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("created-date", matches[0].Groups[1].Value);
         Assert.Equal("2024-01-15", matches[0].Groups[2].Value);
     }
@@ -378,7 +378,7 @@ public class WikidPadSyntaxTests
         var matches = _syntax.AttributePattern.Matches(input);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("version", matches[0].Groups[1].Value);
         Assert.Equal("1.0.0", matches[0].Groups[2].Value);
     }
@@ -408,7 +408,7 @@ public class WikidPadSyntaxTests
         // Assert
         // This WILL match because AttributePattern is more general
         // The distinction is semantic, not syntactic
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("tag", matches[0].Groups[1].Value);
     }
 
@@ -422,7 +422,7 @@ public class WikidPadSyntaxTests
         var matches = _syntax.AttributePattern.Matches(input);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("description", matches[0].Groups[1].Value);
         Assert.Equal("This is a long description", matches[0].Groups[2].Value);
     }

@@ -259,7 +259,7 @@ Content";
         var attributes = sut.GetAttributes();
 
         // Assert
-        Assert.Equal(1, attributes.Count);
+        Assert.Single(attributes);
         Assert.Equal("John", attributes["author"]);
         Assert.False(attributes.ContainsKey("tags"));
         Assert.False(attributes.ContainsKey("aliases"));
@@ -279,7 +279,7 @@ Content";
         var attributes = sut.GetAttributes();
 
         // Assert
-        Assert.Equal(0, attributes.Count);
+        Assert.Empty(attributes);
     }
 
     [Fact]
@@ -299,7 +299,7 @@ Content";
         var attributes = sut.GetAttributes();
 
         // Assert
-        Assert.Equal(1, attributes.Count);
+        Assert.Single(attributes);
         Assert.Equal("cat1, cat2", attributes["categories"]);
     }
 
@@ -320,7 +320,7 @@ Content [status:: inline]";
         var attributes = sut.GetAttributes();
 
         // Assert
-        Assert.Equal(1, attributes.Count);
+        Assert.Single(attributes);
         // Inline is processed first, then YAML overwrites it
         Assert.Equal("yaml", attributes["status"]);
     }

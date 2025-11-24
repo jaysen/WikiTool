@@ -74,7 +74,7 @@ public class WikidpadPageTests
         var attributes = sut.GetAttributes();
 
         // Assert
-        Assert.Equal(1, attributes.Count);
+        Assert.Single(attributes);
         Assert.True(attributes.ContainsKey("author"));
         Assert.Equal("John Doe", attributes["author"]);
     }
@@ -113,7 +113,7 @@ public class WikidpadPageTests
         var attributes = sut.GetAttributes();
 
         // Assert
-        Assert.Equal(0, attributes.Count);
+        Assert.Empty(attributes);
     }
 
     [Fact]
@@ -149,7 +149,7 @@ public class WikidpadPageTests
         var attributes = sut.GetAttributes();
 
         // Assert
-        Assert.Equal(1, attributes.Count);
+        Assert.Single(attributes);
         Assert.Equal("final", attributes["status"]); // Last value wins
     }
 }

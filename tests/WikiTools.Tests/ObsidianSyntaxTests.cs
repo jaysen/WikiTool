@@ -20,7 +20,7 @@ public class ObsidianSyntaxTests
         var matches = _syntax.LinkPattern.Matches(input);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("Page Name", matches[0].Groups[1].Value);
     }
 
@@ -34,7 +34,7 @@ public class ObsidianSyntaxTests
         var matches = _syntax.LinkPattern.Matches(input);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("Page Name", matches[0].Groups[1].Value);
     }
 
@@ -67,7 +67,7 @@ public class ObsidianSyntaxTests
         var matches = _syntax.TagPattern.Matches(input);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("important", matches[0].Groups[1].Value);
     }
 
@@ -81,7 +81,7 @@ public class ObsidianSyntaxTests
         var matches = _syntax.TagPattern.Matches(input);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("tag", matches[0].Groups[1].Value);
     }
 
@@ -95,7 +95,7 @@ public class ObsidianSyntaxTests
         var matches = _syntax.TagPattern.Matches(input);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("startline", matches[0].Groups[1].Value);
     }
 
@@ -109,7 +109,7 @@ public class ObsidianSyntaxTests
         var matches = _syntax.TagPattern.Matches(input);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("my-tag-name", matches[0].Groups[1].Value);
     }
 
@@ -123,7 +123,7 @@ public class ObsidianSyntaxTests
         var matches = _syntax.TagPattern.Matches(input);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("my_tag_name", matches[0].Groups[1].Value);
     }
 
@@ -137,7 +137,7 @@ public class ObsidianSyntaxTests
         var matches = _syntax.TagPattern.Matches(input);
 
         // Assert
-        Assert.Equal(0, matches.Count);
+        Assert.Empty(matches);
     }
 
     [Fact]
@@ -169,7 +169,7 @@ public class ObsidianSyntaxTests
         var matches = _syntax.HeaderPattern.Matches(input);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal(expectedHashCount, matches[0].Groups[1].Value.Length);
         Assert.Equal(expectedText, matches[0].Groups[2].Value);
     }
@@ -197,7 +197,7 @@ public class ObsidianSyntaxTests
         var matches = _syntax.HeaderPattern.Matches(input);
 
         // Assert
-        Assert.Equal(0, matches.Count);
+        Assert.Empty(matches);
     }
 
     #endregion
@@ -217,7 +217,7 @@ Content";
         var matches = ObsidianSyntax.YamlPattern.Matches(input);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Contains("title: My Page", matches[0].Groups[1].Value);
     }
 
@@ -236,7 +236,7 @@ Content";
         var matches = ObsidianSyntax.YamlPattern.Matches(input);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         var frontmatter = matches[0].Groups[1].Value;
         Assert.Contains("title: My Page", frontmatter);
         Assert.Contains("tags: [tag1, tag2]", frontmatter);
@@ -256,7 +256,7 @@ title: My Page
         var matches = ObsidianSyntax.YamlPattern.Matches(input);
 
         // Assert
-        Assert.Equal(0, matches.Count);
+        Assert.Empty(matches);
     }
 
     #endregion
@@ -273,7 +273,7 @@ title: My Page
         var matches = ObsidianSyntax.YamlTagPattern.Matches(frontmatter);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("important", matches[0].Groups[1].Value);
     }
 
@@ -287,7 +287,7 @@ title: My Page
         var matches = ObsidianSyntax.YamlTagPattern.Matches(frontmatter);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("first, second, third", matches[0].Groups[1].Value);
     }
 
@@ -301,7 +301,7 @@ title: My Page
         var matches = ObsidianSyntax.YamlTagPattern.Matches(frontmatter);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Contains("tag one", matches[0].Groups[1].Value);
     }
 
@@ -319,7 +319,7 @@ title: My Page
         var matches = ObsidianSyntax.YamlAttributePattern.Matches(frontmatter);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("author", matches[0].Groups[1].Value);
         Assert.Equal("John Doe", matches[0].Groups[2].Value);
     }
@@ -352,7 +352,7 @@ date: 2024-01-15";
         var matches = ObsidianSyntax.YamlAttributePattern.Matches(frontmatter);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("created-date", matches[0].Groups[1].Value);
         Assert.Equal("2024-01-15", matches[0].Groups[2].Value);
     }
@@ -367,7 +367,7 @@ date: 2024-01-15";
         var matches = ObsidianSyntax.YamlAttributePattern.Matches(frontmatter);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("aliases", matches[0].Groups[1].Value);
         Assert.Equal("[alias1, alias2]", matches[0].Groups[2].Value);
     }
@@ -386,7 +386,7 @@ date: 2024-01-15";
         var matches = _syntax.AliasPattern.Matches(frontmatter);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("My Alias", matches[0].Groups[1].Value);
     }
 
@@ -400,7 +400,7 @@ date: 2024-01-15";
         var matches = _syntax.AliasPattern.Matches(frontmatter);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("First, Second, Third", matches[0].Groups[1].Value);
     }
 
@@ -418,7 +418,7 @@ date: 2024-01-15";
         var matches = _syntax.AttributePattern.Matches(input);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("author", matches[0].Groups[1].Value);
         Assert.Equal("John Doe", matches[0].Groups[2].Value);
     }
@@ -433,7 +433,7 @@ date: 2024-01-15";
         var matches = _syntax.AttributePattern.Matches(input);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("created-date", matches[0].Groups[1].Value);
         Assert.Equal("2024-01-15", matches[0].Groups[2].Value);
     }
@@ -448,7 +448,7 @@ date: 2024-01-15";
         var matches = _syntax.AttributePattern.Matches(input);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("created_date", matches[0].Groups[1].Value);
     }
 
@@ -462,7 +462,7 @@ date: 2024-01-15";
         var matches = _syntax.AttributePattern.Matches(input);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("version", matches[0].Groups[1].Value);
         Assert.Equal("1.0.0", matches[0].Groups[2].Value);
     }
@@ -490,7 +490,7 @@ date: 2024-01-15";
         var matches = _syntax.AttributePattern.Matches(input);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("description", matches[0].Groups[1].Value);
         Assert.Equal("This is a long description", matches[0].Groups[2].Value);
     }
@@ -505,7 +505,7 @@ date: 2024-01-15";
         var matches = _syntax.AttributePattern.Matches(input);
 
         // Assert
-        Assert.Equal(0, matches.Count);
+        Assert.Empty(matches);
     }
 
     [Fact]
@@ -521,7 +521,7 @@ date: 2024-01-15";
         var matches = _syntax.AttributePattern.Matches(input);
 
         // Assert
-        Assert.Equal(1, matches.Count);
+        Assert.Single(matches);
         Assert.Equal("related", matches[0].Groups[1].Value);
         Assert.Equal("simple value", matches[0].Groups[2].Value);
     }
