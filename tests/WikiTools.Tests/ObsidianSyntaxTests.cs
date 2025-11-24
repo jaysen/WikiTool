@@ -527,4 +527,127 @@ date: 2024-01-15";
     }
 
     #endregion
+
+    #region Missing Closing Bracket Tests
+
+    [Fact]
+    public void LinkPattern_MissingClosingBracket_DoesNotMatch()
+    {
+        // Arrange
+        var input = @"[[MissingBracket
+Next line content";
+
+        // Act
+        var matches = _syntax.LinkPattern.Matches(input);
+
+        // Assert - Should not match malformed link
+        Assert.Empty(matches);
+    }
+
+    [Fact]
+    public void LinkPattern_MissingClosingBracketWithValidLink_OnlyMatchesValid()
+    {
+        // Arrange
+        var input = @"[[MissingBracket
+[[ValidLink]]
+More content";
+
+        // Act
+        var matches = _syntax.LinkPattern.Matches(input);
+
+        // Assert - Should only match the valid link
+        Assert.Single(matches);
+        Assert.Equal("ValidLink", matches[0].Groups[1].Value);
+    }
+
+    [Fact]
+    public void AttributePattern_MissingClosingBracket_DoesNotMatch()
+    {
+        // Arrange
+        var input = @"[author:: John Doe
+Next line";
+
+        // Act
+        var matches = _syntax.AttributePattern.Matches(input);
+
+        // Assert - Should not match malformed attribute
+        Assert.Empty(matches);
+    }
+
+    [Fact]
+    public void AttributePattern_MissingClosingBracketWithValidAttribute_OnlyMatchesValid()
+    {
+        // Arrange
+        var input = @"[author:: incomplete
+[status:: complete]
+More content";
+
+        // Act
+        var matches = _syntax.AttributePattern.Matches(input);
+
+        // Assert - Should only match the valid attribute
+        Assert.Single(matches);
+        Assert.Equal("status", matches[0].Groups[1].Value);
+        Assert.Equal("complete", matches[0].Groups[2].Value);
+    }
+
+    [Fact]
+    public void YamlTagPattern_MissingClosingBracket_DoesNotMatch()
+    {
+        // Arrange
+        var input = @"tags: [incomplete
+another: line";
+
+        // Act
+        var matches = ObsidianSyntax.YamlTagPattern.Matches(input);
+
+        // Assert - Should not match malformed tags array
+        Assert.Empty(matches);
+    }
+
+    [Fact]
+    public void YamlTagPattern_MissingClosingBracketWithValid_OnlyMatchesValid()
+    {
+        // Arrange
+        var input = @"tags: [incomplete
+tags: [valid]";
+
+        // Act
+        var matches = ObsidianSyntax.YamlTagPattern.Matches(input);
+
+        // Assert - Should only match the valid tags
+        Assert.Single(matches);
+        Assert.Equal("valid", matches[0].Groups[1].Value);
+    }
+
+    [Fact]
+    public void AliasPattern_MissingClosingBracket_DoesNotMatch()
+    {
+        // Arrange
+        var input = @"aliases: [incomplete
+another: line";
+
+        // Act
+        var matches = _syntax.AliasPattern.Matches(input);
+
+        // Assert - Should not match malformed aliases array
+        Assert.Empty(matches);
+    }
+
+    [Fact]
+    public void AliasPattern_MissingClosingBracketWithValid_OnlyMatchesValid()
+    {
+        // Arrange
+        var input = @"aliases: [incomplete
+aliases: [valid]";
+
+        // Act
+        var matches = _syntax.AliasPattern.Matches(input);
+
+        // Assert - Should only match the valid aliases
+        Assert.Single(matches);
+        Assert.Equal("valid", matches[0].Groups[1].Value);
+    }
+
+    #endregion
 }
