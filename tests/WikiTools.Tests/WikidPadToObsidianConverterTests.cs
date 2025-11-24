@@ -612,6 +612,120 @@ Some WikiWord and [single link]
         Assert.DoesNotContain("[[status:: draft]]", result);
     }
 
+    #region Alias Conversion Tests
+
+    [Fact]
+    public void ConvertAliases_SingleAlias_GeneratesYamlFrontmatter()
+    {
+        // Arrange
+        var content = "[alias:MyAlias]\n+ Header\nSome content";
+        var converter = CreateConverter();
+
+        // Act
+        var result = converter.ConvertContent(content);
+
+        // Assert
+        Assert.StartsWith("---", result);
+        Assert.Contains("aliases:", result);
+        Assert.Contains("  - MyAlias", result);
+        Assert.Contains("# Header", result);
+    }
+
+    [Fact]
+    public void ConvertAliases_MultipleAliases_AllInFrontmatter()
+    {
+        // Arrange
+        var content = "[alias:FirstAlias] [alias:SecondAlias]\n+ Header";
+        var converter = CreateConverter();
+
+        // Act
+        var result = converter.ConvertContent(content);
+
+        // Assert
+        Assert.StartsWith("---", result);
+        Assert.Contains("aliases:", result);
+        Assert.Contains("  - FirstAlias", result);
+        Assert.Contains("  - SecondAlias", result);
+    }
+
+    [Fact]
+    public void ConvertAliases_AliasWithSpaces_PreservedInFrontmatter()
+    {
+        // Arrange
+        var content = "[alias:My Alias Name]\nContent";
+        var converter = CreateConverter();
+
+        // Act
+        var result = converter.ConvertContent(content);
+
+        // Assert
+        Assert.Contains("  - My Alias Name", result);
+    }
+
+
+    [Fact]
+    public void ConvertAliases_RemovesAliasTagsFromContent()
+    {
+        // Arrange
+        var content = "[alias:MyAlias]\n+ Header\nSome content";
+        var converter = CreateConverter();
+
+        // Act
+        var result = converter.ConvertContent(content);
+
+        // Assert
+        Assert.DoesNotContain("[alias:", result);
+    }
+
+    [Fact]
+    public void ConvertAliases_CompleteConversion_CorrectFormat()
+    {
+        // Arrange - exact format from issue #5
+        var content = "[alias:FirstAlias] [alias:SecondAlias]\n+ My Page\nContent here";
+        var converter = CreateConverter();
+
+        // Act
+        var result = converter.ConvertContent(content);
+
+        // Assert - verify exact YAML format
+        var lines = result.Split('\n');
+        Assert.Equal("---", lines[0]);
+        Assert.Equal("aliases:", lines[1]);
+        Assert.Equal("  - FirstAlias", lines[2]);
+        Assert.Equal("  - SecondAlias", lines[3]);
+        Assert.Equal("---", lines[4]);
+        Assert.Contains("# My Page", result);
+    }
+
+    [Fact]
+    public void ConvertAliases_WithOtherElements_AllConverted()
+    {
+        // Arrange
+        var content = @"[alias:PageAlias]
++ Test Page
+[tag:important]
+[author: John]
+Some WikiWord here";
+        var converter = CreateConverter();
+
+        // Act
+        var result = converter.ConvertContent(content);
+
+        // Assert
+        // YAML frontmatter with alias
+        Assert.StartsWith("---", result);
+        Assert.Contains("  - PageAlias", result);
+        // Other conversions still work
+        Assert.Contains("# Test Page", result);
+        Assert.Contains("#important", result);
+        Assert.Contains("[author:: John]", result);
+        Assert.Contains("[[WikiWord]]", result);
+        // Alias tag removed from content
+        Assert.DoesNotContain("[alias:", result);
+    }
+
+    #endregion
+
     private WikidPadToObsidianConverter CreateConverter()
     {
         Directory.CreateDirectory(_sourceDir);

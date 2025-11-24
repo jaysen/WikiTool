@@ -462,10 +462,72 @@ public class WikidPadSyntaxTests
     #region AliasPattern Tests
 
     [Fact]
-    public void AliasPattern_IsNull()
+    public void AliasPattern_MatchesBasicAlias()
     {
-        // Arrange & Act & Assert
-        Assert.Null(_syntax.AliasPattern);
+        // Arrange
+        var input = "[alias:MyAlias]";
+
+        // Act
+        var matches = _syntax.AliasPattern.Matches(input);
+
+        // Assert
+        Assert.Single(matches);
+        Assert.Equal("MyAlias", matches[0].Groups[1].Value);
+    }
+
+    [Fact]
+    public void AliasPattern_MatchesAliasWithSpaces()
+    {
+        // Arrange
+        var input = "[alias:My Alias Name]";
+
+        // Act
+        var matches = _syntax.AliasPattern.Matches(input);
+
+        // Assert
+        Assert.Single(matches);
+        Assert.Equal("My Alias Name", matches[0].Groups[1].Value);
+    }
+
+    [Fact]
+    public void AliasPattern_MatchesMultipleAliases()
+    {
+        // Arrange
+        var input = "[alias:First] some text [alias:Second]";
+
+        // Act
+        var matches = _syntax.AliasPattern.Matches(input);
+
+        // Assert
+        Assert.Equal(2, matches.Count);
+        Assert.Equal("First", matches[0].Groups[1].Value);
+        Assert.Equal("Second", matches[1].Groups[1].Value);
+    }
+
+    [Fact]
+    public void AliasPattern_DoesNotMatchOtherAttributes()
+    {
+        // Arrange - Other attributes should not match
+        var input = "[author: John] [status: draft]";
+
+        // Act
+        var matches = _syntax.AliasPattern.Matches(input);
+
+        // Assert
+        Assert.Empty(matches);
+    }
+
+    [Fact]
+    public void AliasPattern_DoesNotMatchTags()
+    {
+        // Arrange - Tags should not match alias pattern
+        var input = "[tag:important]";
+
+        // Act
+        var matches = _syntax.AliasPattern.Matches(input);
+
+        // Assert
+        Assert.Empty(matches);
     }
 
     #endregion

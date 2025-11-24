@@ -1,6 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace WikiTools.Converters;
@@ -77,12 +77,22 @@ public class WikidPadToObsidianConverter
             return content;
         }
 
+        // Extract aliases first (they need to go in YAML frontmatter)
+        var aliases = ExtractAliases(content);
+        content = RemoveAliases(content);
+
         // Apply conversions in order
         // IMPORTANT: Tags and attributes must be converted before links to prevent [tag:...] and [attr:...] from being treated as links
         content = ConvertHeaders(content);
         content = ConvertTags(content);
         content = ConvertAttributes(content);
         content = ConvertLinks(content);
+
+        // Add YAML frontmatter if we have aliases
+        if (aliases.Count > 0)
+        {
+            content = GenerateYamlFrontmatter(aliases) + content;
+        }
 
         return content;
     }
@@ -179,5 +189,54 @@ public class WikidPadToObsidianConverter
             var value = match.Groups[2].Value.Trim();
             return $"[{key}:: {value}]";
         });
+    }
+
+    /// <summary>
+    /// Extract all aliases from WikidPad content
+    /// WikidPad syntax: [alias:AliasName]
+    /// </summary>
+    private List<string> ExtractAliases(string content)
+    {
+        var aliases = new List<string>();
+        var matches = _sourceSyntax.AliasPattern.Matches(content);
+
+        foreach (Match match in matches)
+        {
+            var alias = match.Groups[1].Value.Trim();
+            if (!string.IsNullOrEmpty(alias))
+            {
+                aliases.Add(alias);
+            }
+        }
+
+        return aliases;
+    }
+
+    /// <summary>
+    /// Remove all alias tags from content
+    /// </summary>
+    private string RemoveAliases(string content)
+    {
+        // Remove [alias:...] tags and any trailing whitespace/newlines
+        content = _sourceSyntax.AliasPattern.Replace(content, "");
+        // Clean up any leftover empty lines at the start
+        content = Regex.Replace(content, @"^\s*\n", "", RegexOptions.Multiline);
+        return content.TrimStart();
+    }
+
+    /// <summary>
+    /// Generate YAML frontmatter with aliases
+    /// </summary>
+    private static string GenerateYamlFrontmatter(List<string> aliases)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("---");
+        sb.AppendLine("aliases:");
+        foreach (var alias in aliases)
+        {
+            sb.AppendLine($"  - {alias}");
+        }
+        sb.AppendLine("---");
+        return sb.ToString();
     }
 }

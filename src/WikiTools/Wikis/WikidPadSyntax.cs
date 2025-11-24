@@ -60,9 +60,12 @@ public partial class WikidPadSyntax : WikiSyntax
     public override Regex HeaderPattern => HeaderPatternRegex();
 
     /// <summary>
-    /// WikidPad doesn't support aliases
+    /// Pattern for matching WikidPad alias attributes: [alias:AliasName]
+    /// Captures the alias name
     /// </summary>
-    public override Regex AliasPattern => null;
+    [GeneratedRegex(@"\[alias:([^\]]+)\]")]
+    private static partial Regex AliasPatternRegex();
+    public override Regex AliasPattern => AliasPatternRegex();
 
     /// <summary>
     /// Pattern for matching WikidPad attributes: [key: value]
