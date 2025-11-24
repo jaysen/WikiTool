@@ -13,8 +13,9 @@ public partial class WikidPadSyntax : WikiSyntax
     /// Note: WikidPad uses SINGLE brackets only (not double [[brackets]])
     /// For bare CamelCase WikiWords without brackets, use CamelCaseLinkPattern
     /// This pattern is the same as SingleBracketLinkPattern
+    /// Excludes newlines to prevent matching malformed patterns (missing closing bracket)
     /// </summary>
-    [GeneratedRegex(@"(?<!\[)\[([^\]]+)\](?!\])")]
+    [GeneratedRegex(@"(?<!\[)\[([^\]\r\n]+)\](?!\])")]
     private static partial Regex LinkPatternRegex();
     public override Regex LinkPattern => LinkPatternRegex();
 
@@ -33,15 +34,17 @@ public partial class WikidPadSyntax : WikiSyntax
     /// Uses negative lookbehind/lookahead to avoid matching [[ or ]]
     /// Excludes content containing colons to avoid matching attributes [key: value]
     /// Excludes content containing equals to avoid matching special attributes [icon=date]
+    /// Excludes newlines to prevent matching malformed patterns (missing closing bracket)
     /// </summary>
-    [GeneratedRegex(@"(?<!\[)\[([^\]:=]+)\](?!\])")]
+    [GeneratedRegex(@"(?<!\[)\[([^\]:=\r\n]+)\](?!\])")]
     private static partial Regex SingleBracketLinkPatternRegex();
     public static Regex SingleBracketLinkPattern => SingleBracketLinkPatternRegex();
 
     /// <summary>
     /// Pattern for matching WikidPad tags: [tag:tagname]
+    /// Excludes newlines to prevent matching malformed patterns (missing closing bracket)
     /// </summary>
-    [GeneratedRegex(@"\[tag:([^\]]+)\]")]
+    [GeneratedRegex(@"\[tag:([^\]\r\n]+)\]")]
     private static partial Regex TagPatternRegex();
     public override Regex TagPattern => TagPatternRegex();
 
@@ -62,8 +65,9 @@ public partial class WikidPadSyntax : WikiSyntax
     /// <summary>
     /// Pattern for matching WikidPad alias attributes: [alias:AliasName]
     /// Captures the alias name
+    /// Excludes newlines to prevent matching malformed patterns (missing closing bracket)
     /// </summary>
-    [GeneratedRegex(@"\[alias:([^\]]+)\]")]
+    [GeneratedRegex(@"\[alias:([^\]\r\n]+)\]")]
     private static partial Regex AliasPatternRegex();
     public override Regex AliasPattern => AliasPatternRegex();
 
@@ -71,8 +75,9 @@ public partial class WikidPadSyntax : WikiSyntax
     /// Pattern for matching WikidPad attributes: [key: value]
     /// Captures both the attribute name (key) and value
     /// Uses negative lookahead to avoid matching already-converted [key:: value]
+    /// Excludes newlines to prevent matching malformed patterns (missing closing bracket)
     /// </summary>
-    [GeneratedRegex(@"\[([a-zA-Z0-9_-]+):(?!:)\s*([^\]]+)\]")]
+    [GeneratedRegex(@"\[([a-zA-Z0-9_-]+):(?!:)\s*([^\]\r\n]+)\]")]
     private static partial Regex AttributePatternRegex();
     public override Regex AttributePattern => AttributePatternRegex();
 }

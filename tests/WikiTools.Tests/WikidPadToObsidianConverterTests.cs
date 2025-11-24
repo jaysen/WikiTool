@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using WikiTools.Converters;
 using Xunit;
 
@@ -722,6 +723,279 @@ Some WikiWord here";
         Assert.Contains("[[WikiWord]]", result);
         // Alias tag removed from content
         Assert.DoesNotContain("[alias:", result);
+    }
+
+    #endregion
+
+    #region Missing Closing Bracket Tests
+
+    [Fact]
+    public void ConvertLinks_MissingClosingBracket_HandledSafely()
+    {
+        // Arrange - Create test files
+        Directory.CreateDirectory(_sourceDir);
+        var dataDir = Path.Combine(_sourceDir, "data");
+        Directory.CreateDirectory(dataDir);
+
+        var sourceContent = @"+ Test Page with Malformed Links
+
+This is a link with missing bracket: [MissingBracket
+
+And here's a valid link: [ValidLink]
+
+Another malformed: [AnotherMissing at the end of file";
+
+        var sourceFile = Path.Combine(dataDir, "MalformedLinks.wiki");
+        File.WriteAllText(sourceFile, sourceContent);
+
+        if (Directory.Exists(_destDir))
+        {
+            Directory.Delete(_destDir, true);
+        }
+
+        var converter = new WikidPadToObsidianConverter(_sourceDir, _destDir);
+
+        // Act
+        converter.ConvertAll();
+
+        // Assert
+        var destFile = Path.Combine(_destDir, "MalformedLinks.md");
+        Assert.True(File.Exists(destFile), "Output file should be created");
+
+        var result = File.ReadAllText(destFile);
+
+        // Valid link should be converted
+        Assert.Contains("[[ValidLink]]", result);
+
+        // Malformed links should be left as-is (not converted)
+        Assert.Contains("[MissingBracket", result);
+        Assert.Contains("[AnotherMissing", result);
+
+        // Should not create malformed output like [[MissingBracket
+        Assert.DoesNotContain("[[MissingBracket\n", result);
+    }
+
+    [Fact]
+    public void ConvertTags_MissingClosingBracket_HandledSafely()
+    {
+        // Arrange - Create test files
+        Directory.CreateDirectory(_sourceDir);
+        var dataDir = Path.Combine(_sourceDir, "data");
+        Directory.CreateDirectory(dataDir);
+
+        var sourceContent = @"+ Test Page with Malformed Tags
+
+This is a tag with missing bracket: [tag:important
+
+And here's a valid tag: [tag:valid]
+
+Another malformed: [tag:another at the end";
+
+        var sourceFile = Path.Combine(dataDir, "MalformedTags.wiki");
+        File.WriteAllText(sourceFile, sourceContent);
+
+        if (Directory.Exists(_destDir))
+        {
+            Directory.Delete(_destDir, true);
+        }
+
+        var converter = new WikidPadToObsidianConverter(_sourceDir, _destDir);
+
+        // Act
+        converter.ConvertAll();
+
+        // Assert
+        var destFile = Path.Combine(_destDir, "MalformedTags.md");
+        Assert.True(File.Exists(destFile), "Output file should be created");
+
+        var result = File.ReadAllText(destFile);
+
+        // Valid tag should be converted
+        Assert.Contains("#valid", result);
+
+        // Malformed tags should be left as-is (not converted)
+        Assert.Contains("[tag:important", result);
+        Assert.Contains("[tag:another", result);
+
+        // Should not create malformed output
+        Assert.DoesNotContain("#important\n", result.Replace("#valid", "")); // Avoid matching valid tag
+    }
+
+    [Fact]
+    public void ConvertAttributes_MissingClosingBracket_HandledSafely()
+    {
+        // Arrange - Create test files
+        Directory.CreateDirectory(_sourceDir);
+        var dataDir = Path.Combine(_sourceDir, "data");
+        Directory.CreateDirectory(dataDir);
+
+        var sourceContent = @"+ Test Page with Malformed Attributes
+
+This is an attribute with missing bracket: [author: John Doe
+
+And here's a valid attribute: [status: draft]
+
+Another malformed: [date: 2024-01-15 at the end";
+
+        var sourceFile = Path.Combine(dataDir, "MalformedAttributes.wiki");
+        File.WriteAllText(sourceFile, sourceContent);
+
+        if (Directory.Exists(_destDir))
+        {
+            Directory.Delete(_destDir, true);
+        }
+
+        var converter = new WikidPadToObsidianConverter(_sourceDir, _destDir);
+
+        // Act
+        converter.ConvertAll();
+
+        // Assert
+        var destFile = Path.Combine(_destDir, "MalformedAttributes.md");
+        Assert.True(File.Exists(destFile), "Output file should be created");
+
+        var result = File.ReadAllText(destFile);
+
+        // Valid attribute should be converted
+        Assert.Contains("[status:: draft]", result);
+
+        // Malformed attributes should be left as-is (not converted)
+        Assert.Contains("[author: John Doe", result);
+        Assert.Contains("[date: 2024-01-15", result);
+
+        // Should not create malformed output
+        Assert.DoesNotContain("[author:: John Doe\n", result);
+    }
+
+    [Fact]
+    public void ConvertAliases_MissingClosingBracket_HandledSafely()
+    {
+        // Arrange - Create test files
+        Directory.CreateDirectory(_sourceDir);
+        var dataDir = Path.Combine(_sourceDir, "data");
+        Directory.CreateDirectory(dataDir);
+
+        var sourceContent = @"[alias:ValidAlias]
+[alias:missingbracket
++ Test Page
+
+Some content here";
+
+        var sourceFile = Path.Combine(dataDir, "MalformedAliases.wiki");
+        File.WriteAllText(sourceFile, sourceContent);
+
+        if (Directory.Exists(_destDir))
+        {
+            Directory.Delete(_destDir, true);
+        }
+
+        var converter = new WikidPadToObsidianConverter(_sourceDir, _destDir);
+
+        // Act
+        converter.ConvertAll();
+
+        // Assert
+        var destFile = Path.Combine(_destDir, "MalformedAliases.md");
+        Assert.True(File.Exists(destFile), "Output file should be created");
+
+        var result = File.ReadAllText(destFile);
+
+        // Valid alias should be in frontmatter
+        Assert.Contains("---", result);
+        Assert.Contains("aliases:", result);
+        Assert.Contains("  - ValidAlias", result);
+
+        // Malformed alias should be left in content (not in frontmatter)
+        // Note: 'missingbracket' is not CamelCase so won't be converted to a link
+        Assert.Contains("[alias:missingbracket", result);
+
+        // Frontmatter should NOT contain the malformed alias
+        var lines = result.Split('\n');
+        var frontmatterEnd = Array.IndexOf(lines, "---", 1); // Find second ---
+        var frontmatter = string.Join('\n', lines.Take(frontmatterEnd + 1));
+        Assert.DoesNotContain("missingbracket", frontmatter);
+    }
+
+    [Fact]
+    public void ConvertContent_MixedMalformedPatterns_HandlesAllSafely()
+    {
+        // Arrange - Create test files with multiple types of malformed patterns
+        Directory.CreateDirectory(_sourceDir);
+        var dataDir = Path.Combine(_sourceDir, "data");
+        Directory.CreateDirectory(dataDir);
+
+        var sourceContent = @"+ Mixed Malformed Patterns
+
+[tag:malformed-tag
+[author: incomplete-attr
+[alias:broken-alias
+
+Valid patterns:
+[tag:good-tag]
+[status: complete]
+[ValidLink]
+
+More malformed at end: [another-link and [key: value";
+
+        var sourceFile = Path.Combine(dataDir, "MixedMalformed.wiki");
+        File.WriteAllText(sourceFile, sourceContent);
+
+        if (Directory.Exists(_destDir))
+        {
+            Directory.Delete(_destDir, true);
+        }
+
+        var converter = new WikidPadToObsidianConverter(_sourceDir, _destDir);
+
+        // Act
+        converter.ConvertAll();
+
+        // Assert
+        var destFile = Path.Combine(_destDir, "MixedMalformed.md");
+        Assert.True(File.Exists(destFile), "Output file should be created");
+
+        var result = File.ReadAllText(destFile);
+
+        // Valid patterns should be converted
+        Assert.Contains("#good-tag", result);
+        Assert.Contains("[status:: complete]", result);
+        Assert.Contains("[[ValidLink]]", result);
+
+        // Malformed patterns should remain unchanged
+        Assert.Contains("[tag:malformed-tag", result);
+        Assert.Contains("[author: incomplete-attr", result);
+        Assert.Contains("[alias:broken-alias", result);
+        Assert.Contains("[another-link", result);
+        Assert.Contains("[key: value", result);
+    }
+
+    [Fact]
+    public void ConvertContent_MalformedPatternsInline_HandledGracefully()
+    {
+        // Arrange
+        // Note: When malformed patterns appear on the same line as valid ones,
+        // the regex may greedily match to the valid pattern's closing bracket.
+        // The newline exclusion prevents cross-line issues, but same-line overlaps
+        // are inherent to regex limitations.
+        var content = "Before [tag:broken\ntext after and [link\nhere [status: done] end.";
+        var converter = CreateConverter();
+
+        // Act
+        var result = converter.ConvertContent(content);
+
+        // Assert
+        // Valid attribute should be converted
+        Assert.Contains("[status:: done]", result);
+
+        // Malformed patterns on different lines should remain unchanged
+        Assert.Contains("[tag:broken", result);
+        Assert.Contains("[link", result);
+
+        // Surrounding text should be intact
+        Assert.Contains("Before", result);
+        Assert.Contains("text after", result);
+        Assert.Contains("here", result);
+        Assert.Contains("end.", result);
     }
 
     #endregion
