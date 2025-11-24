@@ -185,6 +185,32 @@ public class WikidPadSyntaxTests
         Assert.Equal(2, matches.Count);
     }
 
+    [Fact]
+    public void SingleBracketLinkPattern_DoesNotMatchEqualSignAttributes()
+    {
+        // Arrange - WikidPad special attributes like [icon=date] should not be matched as links
+        var input = "[icon=date] [icon=pin] [color=blue]";
+
+        // Act
+        var matches = WikidPadSyntax.SingleBracketLinkPattern.Matches(input);
+
+        // Assert
+        Assert.Empty(matches);
+    }
+
+    [Fact]
+    public void SingleBracketLinkPattern_DoesNotMatchColonAttributes()
+    {
+        // Arrange - WikidPad attributes like [author: John] should not be matched as links
+        var input = "[author: John] [status: draft]";
+
+        // Act
+        var matches = WikidPadSyntax.SingleBracketLinkPattern.Matches(input);
+
+        // Assert
+        Assert.Empty(matches);
+    }
+
     #endregion
 
     #region TagPattern Tests

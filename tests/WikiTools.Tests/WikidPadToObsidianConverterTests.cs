@@ -521,8 +521,29 @@ Some WikiWord and [single link]
         Assert.DoesNotContain("[tag::", result);
     }
 
+    [Fact]
+    public void ConvertContent_IgnoresEqualSignAttributes()
+    {
+        // Arrange - WikidPad special attributes like [icon=date] use = instead of :
+        // These should be left unchanged (not converted to Obsidian attributes or links)
+        var content = "[icon=date] [icon=pin] [color=blue]";
+        var converter = CreateConverter();
 
-        [Fact]
+        // Act
+        var result = converter.ConvertContent(content);
+
+        // Assert
+        // Equal sign attributes should remain unchanged
+        Assert.Contains("[icon=date]", result);
+        Assert.Contains("[icon=pin]", result);
+        Assert.Contains("[color=blue]", result);
+        // Should NOT be converted to links
+        Assert.DoesNotContain("[[icon=date]]", result);
+        Assert.DoesNotContain("[[icon=pin]]", result);
+        Assert.DoesNotContain("[[color=blue]]", result);
+    }
+
+    [Fact]
     public void ConvertContent_Attributes_DoesNotConvertToLinks()
     {
         // Arrange

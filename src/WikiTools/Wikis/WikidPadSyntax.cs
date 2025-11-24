@@ -31,8 +31,9 @@ public partial class WikidPadSyntax : WikiSyntax
     /// Pattern for matching single-bracket links: [link text]
     /// Uses negative lookbehind/lookahead to avoid matching [[ or ]]
     /// Excludes content containing colons to avoid matching attributes [key: value]
+    /// Excludes content containing equals to avoid matching special attributes [icon=date]
     /// </summary>
-    [GeneratedRegex(@"(?<!\[)\[([^\]:]+)\](?!\])")]
+    [GeneratedRegex(@"(?<!\[)\[([^\]:=]+)\](?!\])")]
     private static partial Regex SingleBracketLinkPatternRegex();
     public static Regex SingleBracketLinkPattern => SingleBracketLinkPatternRegex();
 
