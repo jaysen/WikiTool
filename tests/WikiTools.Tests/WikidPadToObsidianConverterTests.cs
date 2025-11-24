@@ -530,7 +530,9 @@ Some WikiWord and [single link]
 [tag:important]
 [author::John] [key:value] [keyTwo:: valueTwo]
 Some WikiWord and [single link]
-[status: draft]";
+[status: draft]
+";
+
         var converter = CreateConverter();
 
         // Act
@@ -543,7 +545,8 @@ Some WikiWord and [single link]
         Assert.Contains("[keyTwo:: valueTwo]", result);
         Assert.DoesNotContain("[[author::John]]", result);
         Assert.DoesNotContain("[[key::value]]", result);
-        Assert.DoesNotContain("[[keyTwo:: valueTwo]]", result);
+        Assert.DoesNotContain("[[key:: value]]", result);
+        Assert.DoesNotContain("[[keyTwo::", result);
         Assert.DoesNotContain("[[status:: draft]]", result);
     }
 
