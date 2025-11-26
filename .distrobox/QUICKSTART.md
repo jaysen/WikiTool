@@ -13,7 +13,10 @@ distrobox enter wikitools-dev
 cd ~/path/to/WikiTools.Net
 ./.distrobox/setup.sh
 
-# 4. Build project
+# 4. Optional: Install VS Code (recommended)
+./.distrobox/install-vscode.sh
+
+# 5. Build project
 dotnet restore
 dotnet build
 ```
@@ -52,6 +55,13 @@ exit
 ## Your Wikis
 
 Your `~/wikis` directory is available at the same path inside the container!
+
+## VS Code Integration (Optional)
+
+After running the install script, you can launch VS Code from your host:
+- Run `code` from any terminal (it runs inside the container automatically)
+- Click "Visual Studio Code" in your application menu
+- VS Code will have full access to .NET SDK and all development tools
 
 ## Common Commands
 

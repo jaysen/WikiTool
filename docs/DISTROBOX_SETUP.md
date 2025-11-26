@@ -202,19 +202,57 @@ sudo dnf install dotnet-sdk-9.0
 
 ### Using with VS Code
 
-You can use VS Code on the host and build/run in the container:
+#### Option 1: Install VS Code Inside Container (Recommended)
+
+The easiest way to develop is to install VS Code directly inside the distrobox container. This gives VS Code full access to .NET SDK, X11, and all tools in the container environment.
+
+**First time setup:**
+
+```bash
+# Enter the container
+distrobox enter wikitools-dev
+
+# Run the VSCode installation script
+cd ~/path/to/WikiTools.Net
+./.distrobox/install-vscode.sh
+```
+
+This script will:
+1. Install VS Code inside the container
+2. Export it to your host system using `distrobox-export`
+3. Create a launcher on your host desktop
+
+**Usage:**
+
+After installation, you can launch VS Code from your host:
+- Run `code` from any terminal on your host
+- Click the "Visual Studio Code" application in your application menu
+- VS Code will run inside the container with full access to all development tools
+
+The project files are accessible at: `/var/mnt/DATA2-LIN/DEV/repos/projects/WikiTools/WikiTools.Net`
+
+**Benefits:**
+- VS Code runs with .NET SDK and all tools directly available
+- IntelliSense and debugging work seamlessly
+- No terminal juggling needed
+- X11/Wayland forwarding handled automatically
+
+#### Option 2: Use Host VS Code with Container Terminal
+
+You can also use VS Code on the host and build/run in the container:
 
 1. Open the project in VS Code on host
 2. Open a terminal in VS Code
 3. Run: `distrobox enter wikitools-dev`
 4. Execute build/run commands in the container terminal
 
-Alternatively, use VS Code's Remote - Containers extension (if available for distrobox).
+**Drawback:** VS Code extensions won't have direct access to the .NET SDK inside the container.
 
 ## Configuration Files
 
 - [.distrobox/create-container.sh](../.distrobox/create-container.sh) - Container creation script
 - [.distrobox/setup.sh](../.distrobox/setup.sh) - Post-creation setup script (run inside container)
+- [.distrobox/install-vscode.sh](../.distrobox/install-vscode.sh) - VS Code installation and export script
 - [.distrobox/distrobox.ini](../.distrobox/distrobox.ini) - Configuration reference (for distrobox 1.9.0+)
 
 ## Customization

@@ -28,7 +28,12 @@ distrobox enter wikitools-dev
 
 # Run setup script
 ./.distrobox/setup.sh
+
+# Optional: Install VS Code inside container (recommended)
+./.distrobox/install-vscode.sh
 ```
+
+The VS Code installation script installs VS Code inside the container and exports it to your host, giving you full access to .NET SDK and all development tools. You can then launch VS Code from your host and it will run inside the container automatically.
 
 See [docs/DISTROBOX_SETUP.md](docs/DISTROBOX_SETUP.md) or [.distrobox/QUICKSTART.md](.distrobox/QUICKSTART.md) for detailed instructions.
 
