@@ -19,7 +19,8 @@ echo "📦 Installing GUI dependencies for Avalonia..."
 sudo dnf install -y \
     fontconfig \
     liberation-fonts \
-    dejavu-fonts \
+    dejavu-sans-fonts \
+    dejavu-serif-fonts \
     libICE \
     libSM \
     libX11 \
