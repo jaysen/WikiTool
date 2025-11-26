@@ -15,7 +15,7 @@ A .NET library and CLI tool for working with various wiki formats, with support 
 
 ## Development Setup
 
-### Option 1: Distrobox (Recommended for Bazzite/Immutable Linux)
+### Option 1: Distrobox
 
 For GUI development and testing on your actual wikis, use distrobox:
 
