@@ -13,6 +13,31 @@ A .NET library and CLI tool for working with various wiki formats, with support 
 
 - .NET 9.0 SDK
 
+## Development Setup
+
+### Option 1: Distrobox (Recommended for Bazzite/Immutable Linux)
+
+For GUI development and testing on your actual wikis, use distrobox:
+
+```bash
+# Create and enter container
+distrobox create --file .distrobox/distrobox.ini
+distrobox enter wikitools-dev
+
+# Run setup script
+./.distrobox/setup.sh
+```
+
+See [docs/DISTROBOX_SETUP.md](docs/DISTROBOX_SETUP.md) or [.distrobox/QUICKSTART.md](.distrobox/QUICKSTART.md) for detailed instructions.
+
+### Option 2: DevContainer
+
+Open this repository in VS Code with the Dev Containers extension, or use GitHub Codespaces.
+
+### Option 3: Local Installation
+
+Install .NET 9.0 SDK on your system directly.
+
 ## Building
 
 ```bash
@@ -124,9 +149,12 @@ WikiTools.Net/
 │   │   ├── Pages/               # Page implementations
 │   │   ├── Wikis/               # Wiki implementations
 │   │   └── Converters/          # Format converters
-│   └── WikiTools.CLI/           # Command-line interface
-└── tests/
-    └── WikiTools.Tests/         # Unit tests
+│   ├── WikiTools.CLI/           # Command-line interface
+│   └── WikiTools.Desktop/       # Avalonia desktop GUI (in development)
+├── tests/
+│   └── WikiTools.Tests/         # Unit tests
+├── docs/                        # Documentation
+└── .distrobox/                  # Distrobox development environment
 ```
 
 ## License
