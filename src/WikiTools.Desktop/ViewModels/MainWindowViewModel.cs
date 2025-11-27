@@ -1,6 +1,14 @@
-﻿namespace WikiTools.Desktop.ViewModels;
+using WikiTools.Desktop.Services;
+
+namespace WikiTools.Desktop.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    public string Greeting { get; } = "Welcome to Avalonia!";
+    public ConverterViewModel ConverterViewModel { get; }
+
+    public MainWindowViewModel()
+    {
+        var folderPickerService = new FolderPickerService();
+        ConverterViewModel = new ConverterViewModel(folderPickerService);
+    }
 }

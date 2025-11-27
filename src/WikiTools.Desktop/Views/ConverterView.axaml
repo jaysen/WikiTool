@@ -1,0 +1,115 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:WikiTools.Desktop.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="WikiTools.Desktop.Views.ConverterView"
+             x:DataType="vm:ConverterViewModel">
+
+    <DockPanel Margin="20">
+        <!-- Conversion Panel (Top) -->
+        <StackPanel DockPanel.Dock="Top" Spacing="15">
+            <!-- Title -->
+            <TextBlock Text="WikidPad to Obsidian Converter"
+                       FontSize="24"
+                       FontWeight="Bold"
+                       Margin="0,0,0,20"/>
+
+            <!-- Source Folder -->
+            <StackPanel Spacing="5">
+                <TextBlock Text="Source WikidPad Folder:" FontWeight="SemiBold"/>
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBox Grid.Column="0"
+                             Text="{Binding SourcePath}"
+                             Watermark="Select source folder..."
+                             Margin="0,0,10,0"/>
+                    <Button Grid.Column="1"
+                            Content="Browse..."
+                            Command="{Binding BrowseSourceCommand}"
+                            MinWidth="100"/>
+                </Grid>
+                <TextBlock Text="{Binding SourcePathError}"
+                           Foreground="Red"
+                           IsVisible="{Binding SourcePathError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+            </StackPanel>
+
+            <!-- Destination Folder -->
+            <StackPanel Spacing="5">
+                <TextBlock Text="Destination Obsidian Folder:" FontWeight="SemiBold"/>
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBox Grid.Column="0"
+                             Text="{Binding DestinationPath}"
+                             Watermark="Select destination folder..."
+                             Margin="0,0,10,0"/>
+                    <Button Grid.Column="1"
+                            Content="Browse..."
+                            Command="{Binding BrowseDestinationCommand}"
+                            MinWidth="100"/>
+                </Grid>
+                <TextBlock Text="{Binding DestinationPathError}"
+                           Foreground="Red"
+                           IsVisible="{Binding DestinationPathError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+            </StackPanel>
+
+            <!-- Options -->
+            <StackPanel Spacing="5">
+                <TextBlock Text="Options:" FontWeight="SemiBold"/>
+                <CheckBox Content="Convert Category Tags (CategoryName → #Name)"
+                          IsChecked="{Binding ConvertCategoryTags}"/>
+            </StackPanel>
+
+            <!-- Convert Button -->
+            <Button Content="Convert"
+                    Command="{Binding ConvertCommand}"
+                    HorizontalAlignment="Left"
+                    MinWidth="150"
+                    Padding="20,10"
+                    FontSize="16"
+                    FontWeight="SemiBold"/>
+
+            <!-- Status Message -->
+            <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                    Padding="10"
+                    CornerRadius="4"
+                    IsVisible="{Binding IsConverting}">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <TextBlock Text="⏳" FontSize="16"/>
+                    <TextBlock Text="{Binding StatusMessage}"
+                               FontWeight="SemiBold"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Separator -->
+            <Separator Margin="0,10"/>
+        </StackPanel>
+
+        <!-- Results Panel (Fill remaining space) -->
+        <StackPanel Spacing="10" IsVisible="{Binding HasConversionResults}">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0"
+                           Text="Conversion Log"
+                           FontSize="18"
+                           FontWeight="SemiBold"/>
+                <Button Grid.Column="1"
+                        Content="Clear Log"
+                        Command="{Binding ClearLogCommand}"/>
+            </Grid>
+
+            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4">
+                <ScrollViewer MaxHeight="400"
+                              HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Auto">
+                    <TextBox Text="{Binding ConversionLog}"
+                             IsReadOnly="True"
+                             TextWrapping="NoWrap"
+                             FontFamily="Consolas,Courier New,monospace"
+                             Background="Transparent"
+                             BorderThickness="0"/>
+                </ScrollViewer>
+            </Border>
+        </StackPanel>
+    </DockPanel>
+</UserControl>
