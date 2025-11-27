@@ -183,5 +183,11 @@ public partial class ConverterViewModel : ViewModelBase
         }
     }
 
-
+    [RelayCommand]
+    private void ClearLog()
+    {
+        ConversionLog = string.Empty;
+        HasConversionResults = false;
+        StatusMessage = "Ready to convert";
+    }
 }
