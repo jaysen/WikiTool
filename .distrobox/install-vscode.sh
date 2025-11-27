@@ -1,6 +1,6 @@
 #!/bin/bash
 # Install VSCode inside distrobox and export it to host
-# Run this inside your wikitools-dev container
+# Run this inside your dotnetbox container
 
 set -e
 
@@ -51,8 +51,12 @@ echo "  1. Exit the container: exit"
 echo "  2. Launch VSCode from host: code"
 echo "     (or find 'Visual Studio Code' in your application menu)"
 echo "  3. VSCode will run inside the container with access to all tools"
-echo "  4. Open your project: /var/mnt/DATA2-LIN/DEV/repos/projects/WikiTools/WikiTools.Net"
+echo "  4. Open your project from within VSCode"
 echo ""
 echo "Note: When you run 'code' from your host, it actually runs inside"
-echo "      the distrobox container with full access to .NET, X11, etc."
+echo "    the distrobox container with full access to .NET, X11, etc."
+echo "    UNLESS you have an existing VSCode installation on your host."
+echo "    In that case, you may use the command: " 
+echo "         'distrobox-enter <container-name> -- code ' "
+echo "    to launch VSCode from the container explicitly."
 echo ""

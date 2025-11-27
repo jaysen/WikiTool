@@ -7,10 +7,10 @@
 ./.distrobox/create-container.sh
 
 # 2. Enter container
-distrobox enter wikitools-dev
+distrobox enter dotnetbox
 
 # 3. Run setup script (inside container)
-cd ~/path/to/WikiTools.Net
+cd ~/path/to/your-project
 ./.distrobox/setup.sh
 
 # 4. Optional: Install VS Code (recommended)
@@ -27,9 +27,8 @@ If the script doesn't work, create manually:
 
 ```bash
 distrobox create \
-  --name wikitools-dev \
+  --name dotnetbox \
   --image registry.fedoraproject.org/fedora-toolbox:40 \
-  --volume "$HOME/wikis:$HOME/wikis:rw" \
   --yes
 ```
 
@@ -37,24 +36,21 @@ distrobox create \
 
 ```bash
 # Enter container
-distrobox enter wikitools-dev
+distrobox enter dotnetbox
 
 # Navigate to project
-cd ~/path/to/WikiTools.Net
+cd ~/path/to/your-project
 
-# Run desktop app
-dotnet run --project src/WikiTools.Desktop/WikiTools.Desktop.csproj
-
-# Or run CLI
-dotnet run --project src/WikiTools.CLI/WikiTools.CLI.csproj
+# Run your app
+dotnet run --project path/to/your.csproj
 
 # Exit when done
 exit
 ```
 
-## Your Wikis
+## File Access
 
-Your `~/wikis` directory is available at the same path inside the container!
+Your entire home directory is available at the same path inside the container!
 
 ## VS Code Integration (Optional)
 
@@ -70,13 +66,13 @@ After running the install script, you can launch VS Code from your host:
 distrobox list
 
 # Stop container
-distrobox stop wikitools-dev
+distrobox stop dotnetbox
 
 # Start container
-distrobox start wikitools-dev
+distrobox start dotnetbox
 
 # Delete container
-distrobox rm wikitools-dev
+distrobox rm dotnetbox
 
 # Recreate container
 ./.distrobox/create-container.sh

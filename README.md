@@ -15,7 +15,7 @@ A .NET library and CLI tool for working with various wiki formats, with support 
 
 ## Development Setup
 
-### Option 1: Distrobox
+### Option 1: Distrobox (Linux)
 
 For GUI development and testing on your actual wikis, use distrobox:
 
@@ -24,7 +24,7 @@ For GUI development and testing on your actual wikis, use distrobox:
 ./.distrobox/create-container.sh
 
 # Enter container
-distrobox enter wikitools-dev
+distrobox enter dotnetbox
 
 # Run setup script
 ./.distrobox/setup.sh

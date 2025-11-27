@@ -1,10 +1,10 @@
 #!/bin/bash
-# Setup script for WikiTools.Net distrobox environment
+# Setup script for .NET GUI development distrobox environment
 # This script installs additional dependencies and configures the environment
 
 set -e
 
-echo "🔧 Setting up WikiTools.Net development environment..."
+echo "🔧 Setting up .NET GUI development environment..."
 
 # Install .NET SDK if not already installed
 if ! command -v dotnet &> /dev/null; then
@@ -44,8 +44,8 @@ echo "  .NET Version: $(dotnet --version)"
 echo "  OS: $(cat /etc/os-release | grep PRETTY_NAME | cut -d'"' -f2)"
 echo ""
 echo "Next steps:"
-echo "  1. Navigate to the project: cd ~/path/to/WikiTools.Net"
+echo "  1. Navigate to your project: cd ~/path/to/your-project"
 echo "  2. Restore dependencies: dotnet restore"
 echo "  3. Build the project: dotnet build"
-echo "  4. Run the desktop app: dotnet run --project src/WikiTools.Desktop/WikiTools.Desktop.csproj"
+echo "  4. Run your app: dotnet run --project path/to/your.csproj"
 echo ""

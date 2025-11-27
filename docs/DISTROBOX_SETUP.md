@@ -1,12 +1,12 @@
 # Distrobox Development Environment Setup
 
-This guide explains how to set up and use a distrobox container for WikiTools.Net development on Bazzite (or any immutable Linux distribution).
+This guide explains how to set up and use a distrobox container for .NET GUI development any immutable Linux distribution.
 
 ## Why Distrobox?
 
 Distrobox provides a containerized development environment with these benefits:
 - ✅ Full GUI application support (shares host display)
-- ✅ Access to your host filesystem (including `~/wikis`)
+- ✅ Access to your entire host home directory
 - ✅ Isolated development environment without affecting host system
 - ✅ Easy to recreate and share with other developers
 - ✅ Works seamlessly on immutable distributions like Bazzite
@@ -14,16 +14,15 @@ Distrobox provides a containerized development environment with these benefits:
 ## Prerequisites
 
 - Bazzite or any Linux distribution with distrobox installed
-- Your wiki files should be in `~/wikis`
 
 ## Quick Start
 
 ### 1. Create the Distrobox Container
 
-From your **host system** (Bazzite), navigate to the WikiTools.Net repository and create the container:
+From your **host system**, navigate to your project repository and create the container:
 
 ```bash
-cd ~/path/to/WikiTools.Net
+cd ~/path/to/your-project
 ./.distrobox/create-container.sh
 ```
 
@@ -31,21 +30,20 @@ Or manually:
 
 ```bash
 distrobox create \
-  --name wikitools-dev \
+  --name dotnetbox \
   --image registry.fedoraproject.org/fedora-toolbox:40 \
-  --volume "$HOME/wikis:$HOME/wikis:rw" \
   --yes
 ```
 
-This will create a Fedora-based container named `wikitools-dev` with:
+This will create a Fedora-based container named `dotnetbox` with:
 - Fedora 40 base system
-- Access to your `~/wikis` directory
+- Access to your entire home directory
 - Shared display for GUI applications
 
 ### 2. Enter the Container
 
 ```bash
-distrobox enter wikitools-dev
+distrobox enter dotnetbox
 ```
 
 Your prompt should change to indicate you're inside the container.
@@ -55,11 +53,11 @@ Your prompt should change to indicate you're inside the container.
 Inside the container, navigate to the project and run the setup script:
 
 ```bash
-cd ~/path/to/WikiTools.Net
+cd ~/path/to/your-project
 ./.distrobox/setup.sh
 ```
 
-This installs additional dependencies and Avalonia templates.
+This installs .NET SDK, Avalonia dependencies, and templates.
 
 ### 4. Build and Run
 
@@ -70,20 +68,13 @@ dotnet restore
 # Build the project
 dotnet build
 
-# Run the desktop UI
-dotnet run --project src/WikiTools.Desktop/WikiTools.Desktop.csproj
-
-# Or run the CLI
-dotnet run --project src/WikiTools.CLI/WikiTools.CLI.csproj
+# Run your application
+dotnet run --project path/to/your.csproj
 ```
 
-## Accessing Your Wikis
+## File Access
 
-Your `~/wikis` directory is automatically mounted in the container at the same path. You can access:
-- `~/wikis` - Obsidian and WikidPad wikis
-- All subdirectories within
-
-The desktop application will be able to browse and convert your wiki files.
+Your entire home directory is automatically available in the container at the same path, so all your files and projects are accessible.
 
 ## Container Management
 
@@ -91,16 +82,16 @@ The desktop application will be able to browse and convert your wiki files.
 
 ```bash
 # Start container
-distrobox enter wikitools-dev
+distrobox enter dotnetbox
 
 # Exit container (from inside)
 exit
 
 # Stop container (from host)
-distrobox stop wikitools-dev
+distrobox stop dotnetbox
 
 # Start container (from host)
-distrobox start wikitools-dev
+distrobox start dotnetbox
 ```
 
 ### Delete and Recreate Container
@@ -109,14 +100,14 @@ If you need to start fresh:
 
 ```bash
 # Delete container
-distrobox rm wikitools-dev
+distrobox rm dotnetbox
 
 # Recreate
-cd ~/path/to/WikiTools.Net
+cd ~/path/to/your-project
 ./.distrobox/create-container.sh
 
 # Enter and run setup again
-distrobox enter wikitools-dev
+distrobox enter dotnetbox
 ./.distrobox/setup.sh
 ```
 
@@ -179,8 +170,8 @@ sudo dnf install dotnet-sdk-9.0
 
 1. **Start your day**:
    ```bash
-   distrobox enter wikitools-dev
-   cd ~/path/to/WikiTools.Net
+   distrobox enter dotnetbox
+   cd ~/path/to/your-project
    ```
 
 2. **Make changes** using your host editor (VS Code, Rider, etc.)
@@ -190,7 +181,7 @@ sudo dnf install dotnet-sdk-9.0
    ```bash
    dotnet build
    dotnet test
-   dotnet run --project src/WikiTools.Desktop/WikiTools.Desktop.csproj
+   dotnet run --project path/to/your.csproj
    ```
 
 4. **Git operations** can be done on host or in container
@@ -210,10 +201,10 @@ The easiest way to develop is to install VS Code directly inside the distrobox c
 
 ```bash
 # Enter the container
-distrobox enter wikitools-dev
+distrobox enter dotnetbox
 
 # Run the VSCode installation script
-cd ~/path/to/WikiTools.Net
+cd ~/path/to/your-project
 ./.distrobox/install-vscode.sh
 ```
 
@@ -229,8 +220,6 @@ After installation, you can launch VS Code from your host:
 - Click the "Visual Studio Code" application in your application menu
 - VS Code will run inside the container with full access to all development tools
 
-The project files are accessible at: `/var/mnt/DATA2-LIN/DEV/repos/projects/WikiTools/WikiTools.Net`
-
 **Benefits:**
 - VS Code runs with .NET SDK and all tools directly available
 - IntelliSense and debugging work seamlessly
@@ -243,7 +232,7 @@ You can also use VS Code on the host and build/run in the container:
 
 1. Open the project in VS Code on host
 2. Open a terminal in VS Code
-3. Run: `distrobox enter wikitools-dev`
+3. Run: `distrobox enter dotnetbox`
 4. Execute build/run commands in the container terminal
 
 **Drawback:** VS Code extensions won't have direct access to the .NET SDK inside the container.
@@ -268,13 +257,12 @@ sudo dnf install YOUR_PACKAGE_HERE
 
 ### Mounting Additional Directories
 
-Edit [.distrobox/create-container.sh](../.distrobox/create-container.sh) and add more `--volume` flags:
+If you need to mount directories outside your home directory, edit [.distrobox/create-container.sh](../.distrobox/create-container.sh) and add `--volume` flags:
 
 ```bash
 distrobox create \
-  --name wikitools-dev \
+  --name dotnetbox \
   --image registry.fedoraproject.org/fedora-toolbox:40 \
-  --volume "$HOME/wikis:$HOME/wikis:rw" \
   --volume "/path/on/host:/path/in/container:rw" \
   --yes
 ```
@@ -293,22 +281,14 @@ Edit [.distrobox/create-container.sh](../.distrobox/create-container.sh) and cha
 
 Note: You'll need to adjust package installation commands in [setup.sh](../.distrobox/setup.sh) for different distros.
 
-## Benefits for WikiTools Development
+## Benefits for .NET GUI Development
 
-- **Test on your actual wikis**: Direct access to `~/wikis`
-- **GUI testing**: Run Avalonia UI natively with full GPU acceleration
+- **Access to all your files**: Direct access to your entire home directory
+- **GUI testing**: Run Avalonia (or other GUI frameworks) natively with full GPU acceleration
 - **Isolation**: Don't pollute your host system with development tools
 - **Reproducibility**: Share the exact environment with other contributors
 - **Easy reset**: Delete and recreate the container anytime
-
-## Next Steps
-
-Once your environment is set up:
-
-1. Browse to your wikis: The UI will let you select `~/wikis/your-wiki-folder`
-2. Convert between formats: Obsidian ↔ WikidPad
-3. Test atomic fixes and changes on real wiki data
-4. Contribute to development!
+- **Immutable OS friendly**: Perfect for Bazzite, Silverblue, and other immutable distributions
 
 ## Getting Help
 
@@ -316,4 +296,4 @@ If you encounter issues:
 
 1. Check this documentation
 2. Review the [distrobox documentation](https://distrobox.privatedns.org/)
-3. Open an issue on the WikiTools.Net repository
+3. Check your project's issue tracker
