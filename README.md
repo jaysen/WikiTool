@@ -1,14 +1,14 @@
 # WikiTools.Net
 
-A .NET library, CLI tool, and desktop application for working with various wiki formats, with support for converting between WikidPad and Obsidian.
+A .NET library, CLI tool, and desktop application for working with various wiki formats.
 
 ## Features
 
 - **WikidPad Support**: Read and parse WikidPad `.wiki` files
 - **Obsidian Support**: Read and parse Obsidian `.md` files
-- **Format Conversion**: Convert WikidPad wikis to Obsidian format
+- **Format Conversion**: Convert between wikis - WikidPad to Obsidian done. 
 - **CLI Tool**: Command-line interface for easy conversions
-- **Desktop GUI**: Cross-platform Avalonia-based desktop application with visual converter interface
+- **Desktop GUI**: Cross-platform Avalonia-based desktop application - Converter done
 
 ## Requirements
 
