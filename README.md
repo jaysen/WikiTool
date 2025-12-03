@@ -64,7 +64,7 @@ dotnet test
 Run the GUI application:
 
 ```bash
-dotnet run --project src/WikiTools.Desktop
+dotnet run --project src/WikiTool.Desktop
 ```
 
 The desktop application provides a visual interface for converting WikidPad wikis to Obsidian format:
@@ -83,7 +83,7 @@ The GUI is built with Avalonia and runs cross-platform on Windows, Linux, and ma
 Convert a WikidPad wiki to Obsidian format:
 
 ```bash
-dotnet run --project src/WikiTools.CLI -- convert \
+dotnet run --project src/WikiTool.CLI -- convert \
   --from wikidpad \
   --to obsidian \
   --source /path/to/wikidpad \
@@ -93,7 +93,7 @@ dotnet run --project src/WikiTools.CLI -- convert \
 Or using short aliases:
 
 ```bash
-dotnet run --project src/WikiTools.CLI -- convert \
+dotnet run --project src/WikiTool.CLI -- convert \
   -f wikidpad \
   -t obsidian \
   -s /path/to/wikidpad \
@@ -146,8 +146,8 @@ Content here
 ### Library Usage
 
 ```csharp
-using WikiTools;
-using WikiTools.Converters;
+using WikiTool;
+using WikiTool.Converters;
 
 // Read a WikidPad wiki
 var wiki = new WikidpadWiki("/path/to/wikidpad");
@@ -168,19 +168,19 @@ converter.ConvertAll();
 ## Project Structure
 
 ```
-WikiTools.Net/
+WikiTool/
 ├── src/
-│   ├── WikiTools/               # Core library
+│   ├── WikiTool/                # Core library
 │   │   ├── Pages/               # Page implementations
 │   │   ├── Wikis/               # Wiki implementations
 │   │   └── Converters/          # Format converters
-│   ├── WikiTools.CLI/           # Command-line interface
-│   └── WikiTools.Desktop/       # Avalonia desktop GUI
+│   ├── WikiTool.CLI/            # Command-line interface
+│   └── WikiTool.Desktop/        # Avalonia desktop GUI
 │       ├── Services/            # UI services (folder picker, etc.)
 │       ├── ViewModels/          # MVVM ViewModels
 │       └── Views/               # XAML views
 ├── tests/
-│   └── WikiTools.Tests/         # Unit tests
+│   └── WikiTool.Tests/          # Unit tests
 ├── docs/                        # Documentation
 └── .distrobox/                  # Distrobox development environment
 ```
