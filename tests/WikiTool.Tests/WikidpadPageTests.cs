@@ -29,7 +29,7 @@ public class WikidpadPageTests
     {
         //arrange
         var path = Path.Combine(_testFolder, "wrong_extension_test.md");
-        File.Create(path);
+        File.WriteAllText(path, string.Empty);
 
         //assert
         Assert.Throws<FormatException>( () => new WikidpadPage(path));

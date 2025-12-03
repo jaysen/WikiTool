@@ -61,8 +61,8 @@ public class WikidpadWikiTests
     {
         Directory.CreateDirectory(_dataDir);
         //arrange
-        File.Create(Path.Combine(_dataDir, @"TestOne.wiki"));
-        File.Create(Path.Combine(_dataDir, @"TestTwo.wiki"));
+        File.WriteAllText(Path.Combine(_dataDir, @"TestOne.wiki"), string.Empty);
+        File.WriteAllText(Path.Combine(_dataDir, @"TestTwo.wiki"), string.Empty);
         //actual
         var sut = new WikidpadWiki(_testDir);
         var pageList = sut.GetAllPages();
