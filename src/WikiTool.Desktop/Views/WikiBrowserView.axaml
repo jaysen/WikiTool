@@ -1,0 +1,226 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:WikiTool.Desktop.ViewModels"
+             xmlns:models="using:WikiTool.Desktop.Models"
+             xmlns:converters="using:WikiTool.Desktop.Converters"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="700"
+             x:Class="WikiTool.Desktop.Views.WikiBrowserView"
+             x:DataType="vm:WikiBrowserViewModel">
+
+    <UserControl.Resources>
+        <converters:FolderIconConverter x:Key="FolderIconConverter"/>
+    </UserControl.Resources>
+
+    <DockPanel>
+        <!-- Top Toolbar -->
+        <Border DockPanel.Dock="Top"
+                Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                Padding="15,10"
+                BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                BorderThickness="0,0,0,1">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <!-- Select Folder Button -->
+                <Button Grid.Column="0"
+                        Content="Select Wiki Folder"
+                        Command="{Binding SelectWikiFolderCommand}"
+                        MinWidth="150"
+                        Padding="10,5"/>
+
+                <!-- Status Message -->
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            Spacing="10"
+                            VerticalAlignment="Center"
+                            Margin="20,0,0,0">
+                    <TextBlock Text="📁"
+                               FontSize="14"
+                               IsVisible="{Binding HasWikiLoaded}"/>
+                    <TextBlock Text="{Binding StatusMessage}"
+                               VerticalAlignment="Center"
+                               FontWeight="SemiBold"/>
+                    <TextBlock Text="⏳"
+                               FontSize="14"
+                               IsVisible="{Binding IsLoading}"/>
+                </StackPanel>
+
+                <!-- Wiki Root Path -->
+                <TextBlock Grid.Column="2"
+                           Text="{Binding WikiRootPath}"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                           FontSize="11"
+                           IsVisible="{Binding HasWikiLoaded}"/>
+            </Grid>
+        </Border>
+
+        <!-- Main 3-Pane Layout -->
+        <Grid ColumnDefinitions="300,4,*,4,300">
+
+            <!-- LEFT PANE: Folder Tree -->
+            <Border Grid.Column="0"
+                    BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                    BorderThickness="0,0,1,0"
+                    Padding="10">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top"
+                               Text="Wiki Structure"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,10"/>
+
+                    <Border IsVisible="{Binding !HasWikiLoaded}"
+                            Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                            Padding="20"
+                            CornerRadius="4">
+                        <TextBlock Text="Select a wiki folder to begin"
+                                   TextAlignment="Center"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                    </Border>
+
+                    <ScrollViewer IsVisible="{Binding HasWikiLoaded}"
+                                  HorizontalScrollBarVisibility="Auto"
+                                  VerticalScrollBarVisibility="Auto">
+                        <TreeView ItemsSource="{Binding FolderTree}"
+                                  SelectedItem="{Binding SelectedNode}">
+                            <TreeView.DataTemplates>
+                                <TreeDataTemplate DataType="models:FolderTreeNode" ItemsSource="{Binding Children}">
+                                    <StackPanel Orientation="Horizontal" Spacing="5">
+                                        <!-- Icon -->
+                                        <TextBlock Text="{Binding IsFolder, Converter={StaticResource FolderIconConverter}}"
+                                                   FontSize="14"/>
+                                        <!-- Name -->
+                                        <TextBlock Text="{Binding Name}"/>
+                                    </StackPanel>
+                                </TreeDataTemplate>
+                            </TreeView.DataTemplates>
+                        </TreeView>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+
+            <!-- LEFT SPLITTER -->
+            <GridSplitter Grid.Column="1"
+                          Background="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                          ResizeDirection="Columns"/>
+
+            <!-- CENTER PANE: Content Viewer -->
+            <Border Grid.Column="2"
+                    Padding="20">
+                <DockPanel>
+                    <Grid DockPanel.Dock="Top"
+                          ColumnDefinitions="*,Auto"
+                          Margin="0,0,0,15">
+                        <TextBlock Grid.Column="0"
+                                   Text="{Binding SelectedPageName}"
+                                   FontSize="20"
+                                   FontWeight="Bold"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding SelectedNode.Extension}"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                                   VerticalAlignment="Center"
+                                   Margin="10,0,0,0"
+                                   IsVisible="{Binding SelectedNode.IsWikiFile}"/>
+                    </Grid>
+
+                    <Border IsVisible="{Binding !SelectedNode.IsWikiFile}"
+                            Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                            Padding="40"
+                            CornerRadius="4">
+                        <TextBlock Text="Select a wiki file to view its contents"
+                                   TextAlignment="Center"
+                                   FontSize="14"
+                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                    </Border>
+
+                    <ScrollViewer IsVisible="{Binding SelectedNode.IsWikiFile}"
+                                  HorizontalScrollBarVisibility="Auto"
+                                  VerticalScrollBarVisibility="Auto">
+                        <TextBox Text="{Binding PageContent}"
+                                 IsReadOnly="True"
+                                 TextWrapping="Wrap"
+                                 FontFamily="Consolas,Courier New,monospace"
+                                 FontSize="13"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 AcceptsReturn="True"/>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+
+            <!-- RIGHT SPLITTER -->
+            <GridSplitter Grid.Column="3"
+                          Background="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                          ResizeDirection="Columns"/>
+
+            <!-- RIGHT PANE: Operations Panel -->
+            <Border Grid.Column="4"
+                    BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                    BorderThickness="1,0,0,0"
+                    Padding="10">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top"
+                               Text="Operations"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,10"/>
+
+                    <StackPanel Spacing="10">
+                        <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                                Padding="15"
+                                CornerRadius="4">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="File Operations"
+                                           FontWeight="SemiBold"
+                                           FontSize="14"/>
+                                <Button Content="Refresh Tree"
+                                        HorizontalAlignment="Stretch"
+                                        IsEnabled="False"/>
+                                <Button Content="Export Page"
+                                        HorizontalAlignment="Stretch"
+                                        IsEnabled="False"/>
+                                <Button Content="Search Wiki"
+                                        HorizontalAlignment="Stretch"
+                                        IsEnabled="False"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                                Padding="15"
+                                CornerRadius="4">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="Page Info"
+                                           FontWeight="SemiBold"
+                                           FontSize="14"/>
+                                <TextBlock Text="No page selected"
+                                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                                           FontSize="12"
+                                           TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                                Padding="15"
+                                CornerRadius="4">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="Tools"
+                                           FontWeight="SemiBold"
+                                           FontSize="14"/>
+                                <Button Content="Convert Wiki"
+                                        HorizontalAlignment="Stretch"
+                                        IsEnabled="False"/>
+                                <Button Content="Settings"
+                                        HorizontalAlignment="Stretch"
+                                        IsEnabled="False"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+        </Grid>
+    </DockPanel>
+</UserControl>
