@@ -1,0 +1,25 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:WikiTool.Desktop.ViewModels"
+        xmlns:views="using:WikiTool.Desktop.Views"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="700"
+        x:Class="WikiTool.Desktop.Views.ConverterWindow"
+        x:DataType="vm:ConverterViewModel"
+        Title="Convert Wiki"
+        Width="800"
+        Height="700"
+        MinWidth="700"
+        MinHeight="500"
+        CanResize="True"
+        WindowStartupLocation="CenterOwner"
+        SystemDecorations="Full">
+
+    <Design.DataContext>
+        <vm:ConverterViewModel/>
+    </Design.DataContext>
+
+    <views:ConverterView DataContext="{Binding}" Margin="20"/>
+
+</Window>

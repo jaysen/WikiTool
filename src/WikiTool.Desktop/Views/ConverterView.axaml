@@ -7,15 +7,9 @@
              x:Class="WikiTool.Desktop.Views.ConverterView"
              x:DataType="vm:ConverterViewModel">
 
-    <DockPanel Margin="20">
+    <DockPanel>
         <!-- Conversion Panel (Top) -->
         <StackPanel DockPanel.Dock="Top" Spacing="15">
-            <!-- Title -->
-            <TextBlock Text="WikidPad to Obsidian Converter"
-                       FontSize="24"
-                       FontWeight="Bold"
-                       Margin="0,0,0,20"/>
-
             <!-- Source Folder -->
             <StackPanel Spacing="5">
                 <TextBlock Text="Source WikidPad Folder:" FontWeight="SemiBold"/>
