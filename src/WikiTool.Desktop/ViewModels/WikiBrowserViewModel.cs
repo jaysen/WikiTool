@@ -4,10 +4,13 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WikiTool.Desktop.Models;
 using WikiTool.Desktop.Services;
+using WikiTool.Desktop.Views;
 
 namespace WikiTool.Desktop.ViewModels;
 
@@ -44,9 +47,6 @@ public partial class WikiBrowserViewModel : ViewModelBase
     [ObservableProperty]
     private string _statusMessage = "No wiki folder selected";
 
-    [ObservableProperty]
-    private bool _isConverterDialogOpen;
-
     public bool HasWikiLoaded => !string.IsNullOrEmpty(WikiRootPath) && FolderTree.Count > 0;
 
     partial void OnSelectedNodeChanged(FolderTreeNode? value)
@@ -66,15 +66,20 @@ public partial class WikiBrowserViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void OpenConverterDialog()
+    private async Task OpenConverterDialogAsync()
     {
-        IsConverterDialogOpen = true;
-    }
-
-    [RelayCommand]
-    private void CloseConverterDialog()
-    {
-        IsConverterDialogOpen = false;
+        if (Avalonia.Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            var mainWindow = desktop.MainWindow;
+            if (mainWindow != null)
+            {
+                var converterWindow = new ConverterWindow(ConverterViewModel)
+                {
+                    Icon = mainWindow.Icon
+                };
+                await converterWindow.ShowDialog(mainWindow);
+            }
+        }
     }
 
     [RelayCommand]
