@@ -91,8 +91,8 @@ public class WikidpadWikiTests
         Assert.Equal(expected, pageList[0].GetContent());
         Assert.Equal(expected2, pageList[1].GetContent());
 
-        Assert.True(pageList[0].ContentIsStale);            
-        Assert.True(pageList[1].ContentIsStale);
+        Assert.False(pageList[0].ContentIsStale);            
+        Assert.False(pageList[1].ContentIsStale);
 
 
     }

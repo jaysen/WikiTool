@@ -21,7 +21,7 @@ public abstract class LocalPage : Page
     public override string GetContent()
     {
         _contents = File.ReadAllText(PagePath);
-        ContentIsStale = true;
+        ContentIsStale = false;
         return _contents;
     }
 
