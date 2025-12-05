@@ -92,8 +92,10 @@ public class WikidPadToObsidianConverter
         var aliases = ExtractAliases(content);
         content = RemoveAliases(content);
 
-        // Apply conversions in order
-        // IMPORTANT: Tags and attributes must be converted before links to prevent [tag:...] and [attr:...] from being treated as links
+        // Apply conversions
+        // Note: SingleBracketLinkPattern excludes content containing colons or equals signs,
+        // so [tag:...], [attr: ...], and [icon=...] won't be matched as links regardless of order.
+        // We process tags/attributes first for clarity, but the regex design handles the distinction.
         content = ConvertHeaders(content);
         content = ConvertTags(content);
         content = ConvertAttributes(content);
