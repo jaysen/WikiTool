@@ -10,6 +10,11 @@ namespace WikiTool.Wikis;
 public partial class ObsidianSyntax : WikiSyntax
 {
     /// <summary>
+    /// Default static instance for efficient fallback usage
+    /// </summary>
+    public static readonly ObsidianSyntax Default = new();
+
+    /// <summary>
     /// Pattern for matching Obsidian wikilinks: [[link]] or [[link|display]]
     /// Excludes newlines to prevent matching malformed patterns (missing closing bracket)
     /// </summary>

@@ -29,7 +29,7 @@ public class WikidpadPage : LocalPage
         var content = GetContent();
 
         // Use syntax pattern from parent wiki
-        var syntax = (_wiki?.Syntax ?? new WikidPadSyntax()) as WikidPadSyntax;
+        var syntax = (_wiki?.Syntax as WikidPadSyntax) ?? WikidPadSyntax.Default;
 
         // Match bracketed links: [link] or [Wiki Words]
         var bracketedMatches = syntax.LinkPattern.Matches(content);
@@ -66,7 +66,7 @@ public class WikidpadPage : LocalPage
         var content = GetContent();
 
         // Use syntax patterns from parent wiki
-        var syntax = (_wiki?.Syntax ?? new WikidPadSyntax()) as WikidPadSyntax;
+        var syntax = (_wiki?.Syntax as WikidPadSyntax) ?? WikidPadSyntax.Default;
 
         // Match WikidPad tags: [tag:tagname]
         var matches = syntax.TagPattern.Matches(content);
@@ -106,7 +106,7 @@ public class WikidpadPage : LocalPage
         var content = GetContent();
 
         // Use syntax pattern from parent wiki
-        var syntax = (_wiki?.Syntax ?? new WikidPadSyntax()) as WikidPadSyntax;
+        var syntax = (_wiki?.Syntax as WikidPadSyntax) ?? WikidPadSyntax.Default;
         var matches = syntax.HeaderPattern.Matches(content);
 
         foreach (Match match in matches)
@@ -128,7 +128,7 @@ public class WikidpadPage : LocalPage
         var content = GetContent();
 
         // Use syntax pattern from parent wiki
-        var syntax = (_wiki?.Syntax ?? new WikidPadSyntax()) as WikidPadSyntax;
+        var syntax = (_wiki?.Syntax as WikidPadSyntax) ?? WikidPadSyntax.Default;
         var matches = syntax.AttributePattern.Matches(content);
 
         foreach (Match match in matches)

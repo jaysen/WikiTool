@@ -10,6 +10,11 @@ namespace WikiTool.Wikis;
 public partial class WikidPadSyntax : WikiSyntax
 {
     /// <summary>
+    /// Default static instance for efficient fallback usage
+    /// </summary>
+    public static readonly WikidPadSyntax Default = new();
+
+    /// <summary>
     /// Pattern for matching WikidPad bracketed links: [link] or [Wiki Words]
     /// Note: WikidPad uses SINGLE brackets only (not double [[brackets]])
     /// For bare CamelCase WikiWords without brackets, use CamelCaseLinkPattern

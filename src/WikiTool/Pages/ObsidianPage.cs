@@ -30,7 +30,7 @@ public class ObsidianPage : LocalPage
         var content = GetContent();
 
         // Use syntax pattern from parent wiki
-        var syntax = (_wiki?.Syntax ?? new ObsidianSyntax()) as ObsidianSyntax;
+        var syntax = (_wiki?.Syntax as ObsidianSyntax) ?? ObsidianSyntax.Default;
         var matches = syntax.LinkPattern.Matches(content);
 
         foreach (Match match in matches)
@@ -52,7 +52,7 @@ public class ObsidianPage : LocalPage
         var content = GetContent();
 
         // Use syntax patterns from parent wiki
-        var syntax = (_wiki?.Syntax ?? new ObsidianSyntax()) as ObsidianSyntax;
+        var syntax = (_wiki?.Syntax as ObsidianSyntax) ?? ObsidianSyntax.Default;
 
         // Check for YAML frontmatter aliases
         var yamlMatch = ObsidianSyntax.YamlPattern.Match(content);
@@ -87,7 +87,7 @@ public class ObsidianPage : LocalPage
         var content = GetContent();
 
         // Use syntax patterns from parent wiki
-        var syntax = (_wiki?.Syntax ?? new ObsidianSyntax()) as ObsidianSyntax;
+        var syntax = (_wiki?.Syntax as ObsidianSyntax) ?? ObsidianSyntax.Default;
 
         // Match inline tags: #tagname
         var matches = syntax.TagPattern.Matches(content);
@@ -138,7 +138,7 @@ public class ObsidianPage : LocalPage
         var content = GetContent();
 
         // Use syntax pattern from parent wiki
-        var syntax = (_wiki?.Syntax ?? new ObsidianSyntax()) as ObsidianSyntax;
+        var syntax = (_wiki?.Syntax as ObsidianSyntax) ?? ObsidianSyntax.Default;
         var matches = syntax.HeaderPattern.Matches(content);
 
         foreach (Match match in matches)
@@ -160,7 +160,7 @@ public class ObsidianPage : LocalPage
         var content = GetContent();
 
         // Use syntax pattern from parent wiki
-        var syntax = (_wiki?.Syntax ?? new ObsidianSyntax()) as ObsidianSyntax;
+        var syntax = (_wiki?.Syntax as ObsidianSyntax) ?? ObsidianSyntax.Default;
 
         // First: Match inline attributes [key:: value]
         var inlineMatches = syntax.AttributePattern.Matches(content);
