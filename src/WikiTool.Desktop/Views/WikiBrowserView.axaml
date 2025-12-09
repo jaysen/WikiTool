@@ -21,7 +21,7 @@
                 Padding="15,10"
                 BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
                 BorderThickness="0,0,0,1">
-            <Grid ColumnDefinitions="Auto,*,Auto">
+            <Grid ColumnDefinitions="Auto,Auto,*">
                 <!-- Select Folder Button -->
                 <Button Grid.Column="0"
                         Content="Select Wiki Folder"
@@ -29,7 +29,7 @@
                         MinWidth="150"
                         Padding="10,5"/>
 
-                <!-- Status Message -->
+                <!-- Status Message and Wiki Path -->
                 <StackPanel Grid.Column="1"
                             Orientation="Horizontal"
                             Spacing="10"
@@ -41,18 +41,16 @@
                     <TextBlock Text="{Binding StatusMessage}"
                                VerticalAlignment="Center"
                                FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding WikiRootPath}"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                               FontSize="11"
+                               IsVisible="{Binding HasWikiLoaded}"
+                               Margin="5,0,0,0"/>
                     <TextBlock Text="⏳"
                                FontSize="14"
                                IsVisible="{Binding IsLoading}"/>
                 </StackPanel>
-
-                <!-- Wiki Root Path -->
-                <TextBlock Grid.Column="2"
-                           Text="{Binding WikiRootPath}"
-                           VerticalAlignment="Center"
-                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
-                           FontSize="11"
-                           IsVisible="{Binding HasWikiLoaded}"/>
             </Grid>
         </Border>
 
