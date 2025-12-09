@@ -53,7 +53,11 @@ public partial class WikiBrowserViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isEditingTabTitle;
 
-    public bool HasWikiLoaded => !string.IsNullOrEmpty(WikiRootPath) && FolderTree.Count > 0;
+    [ObservableProperty]
+    private bool _hasWikiLoaded;
+
+    [ObservableProperty]
+    private bool _hasPageLoaded;
 
     [RelayCommand]
     private void StartEditingTabTitle()
@@ -86,6 +90,11 @@ public partial class WikiBrowserViewModel : ViewModelBase
         {
             ConverterViewModel.SourcePath = value;
         }
+    }
+
+    private void UpdateHasWikiLoaded()
+    {
+        HasWikiLoaded = !string.IsNullOrEmpty(WikiRootPath) && FolderTree.Count > 0;
     }
 
     [RelayCommand]
@@ -135,10 +144,10 @@ public partial class WikiBrowserViewModel : ViewModelBase
                 FolderTree = new ObservableCollection<FolderTreeNode>(rootNode);
             });
 
+            UpdateHasWikiLoaded();
             var folderName = Path.GetFileName(path);
             TabTitle = string.IsNullOrEmpty(folderName) ? path : folderName;
             StatusMessage = $"Loaded: {folderName}";
-            OnPropertyChanged(nameof(HasWikiLoaded));
         }
         catch (Exception ex)
         {
@@ -217,6 +226,7 @@ public partial class WikiBrowserViewModel : ViewModelBase
         {
             PageContent = "File not found";
             SelectedPageName = node.Name;
+            HasPageLoaded = true;
             return;
         }
 
@@ -224,11 +234,13 @@ public partial class WikiBrowserViewModel : ViewModelBase
         {
             PageContent = File.ReadAllText(node.FullPath);
             SelectedPageName = node.Name;
+            HasPageLoaded = true;
         }
         catch (Exception ex)
         {
             PageContent = $"Error loading file: {ex.Message}";
             SelectedPageName = node.Name;
+            HasPageLoaded = true;
         }
     }
 }
