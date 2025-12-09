@@ -123,10 +123,10 @@
                                    Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
                                    VerticalAlignment="Center"
                                    Margin="10,0,0,0"
-                                   IsVisible="{Binding SelectedNode.IsWikiFile}"/>
+                                   IsVisible="{Binding HasPageLoaded}"/>
                     </Grid>
 
-                    <Border IsVisible="{Binding !SelectedNode.IsWikiFile}"
+                    <Border IsVisible="{Binding !HasPageLoaded}"
                             Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
                             Padding="40"
                             CornerRadius="4">
@@ -136,7 +136,7 @@
                                    Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
                     </Border>
 
-                    <ScrollViewer IsVisible="{Binding SelectedNode.IsWikiFile}"
+                    <ScrollViewer IsVisible="{Binding HasPageLoaded}"
                                   HorizontalScrollBarVisibility="Auto"
                                   VerticalScrollBarVisibility="Auto">
                         <TextBox Text="{Binding PageContent}"
