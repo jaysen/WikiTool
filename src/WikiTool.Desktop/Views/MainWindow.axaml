@@ -20,6 +20,51 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <views:WikiBrowserView DataContext="{Binding WikiBrowserViewModel}"/>
+    <DockPanel>
+        <!-- Top Menu Bar -->
+        <Border DockPanel.Dock="Top"
+                Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="10,8">
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <Button Content="+ New Wiki Tab"
+                        Command="{Binding OpenNewWikiTabCommand}"
+                        Padding="10,5"/>
+                <TextBlock Text="{Binding OpenTabsCount, StringFormat='({0} tabs open)'}"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                           FontSize="12"
+                           IsVisible="{Binding HasOpenTabs}"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Tab Control for Multiple Wikis -->
+        <TabControl ItemsSource="{Binding WikiTabs}"
+                    SelectedItem="{Binding SelectedTab}"
+                    Padding="0">
+            <TabControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:WikiBrowserViewModel">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="{Binding TabTitle}"
+                                   VerticalAlignment="Center"/>
+                        <Button Content="×"
+                                Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).CloseTabCommand}"
+                                CommandParameter="{Binding}"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Padding="4,0"
+                                FontSize="16"
+                                ToolTip.Tip="Close tab"/>
+                    </StackPanel>
+                </DataTemplate>
+            </TabControl.ItemTemplate>
+            <TabControl.ContentTemplate>
+                <DataTemplate x:DataType="vm:WikiBrowserViewModel">
+                    <views:WikiBrowserView DataContext="{Binding}"/>
+                </DataTemplate>
+            </TabControl.ContentTemplate>
+        </TabControl>
+    </DockPanel>
 
 </Window>

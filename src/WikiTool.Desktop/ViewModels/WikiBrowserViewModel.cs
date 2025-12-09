@@ -47,6 +47,9 @@ public partial class WikiBrowserViewModel : ViewModelBase
     [ObservableProperty]
     private string _statusMessage = "No wiki folder selected";
 
+    [ObservableProperty]
+    private string _tabTitle = "New Wiki";
+
     public bool HasWikiLoaded => !string.IsNullOrEmpty(WikiRootPath) && FolderTree.Count > 0;
 
     partial void OnSelectedNodeChanged(FolderTreeNode? value)
@@ -112,7 +115,9 @@ public partial class WikiBrowserViewModel : ViewModelBase
                 FolderTree = new ObservableCollection<FolderTreeNode>(rootNode);
             });
 
-            StatusMessage = $"Loaded: {Path.GetFileName(path)}";
+            var folderName = Path.GetFileName(path);
+            TabTitle = string.IsNullOrEmpty(folderName) ? path : folderName;
+            StatusMessage = $"Loaded: {folderName}";
             OnPropertyChanged(nameof(HasWikiLoaded));
         }
         catch (Exception ex)
