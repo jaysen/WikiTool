@@ -155,7 +155,8 @@
                                 <TreeView.DataTemplates>
                                     <TreeDataTemplate DataType="vm:SelectablePageNode" ItemsSource="{Binding Children}">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <CheckBox IsChecked="{Binding IsSelected}"
+                                            <CheckBox IsChecked="{Binding CheckState}"
+                                                      IsThreeState="True"
                                                       VerticalAlignment="Center"/>
                                             <TextBlock Text="{Binding IsFolder, Converter={StaticResource FolderIconConverter}}"
                                                        FontSize="14"
