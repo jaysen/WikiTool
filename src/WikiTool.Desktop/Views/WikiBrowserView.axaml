@@ -126,17 +126,7 @@
                                    IsVisible="{Binding HasPageLoaded}"/>
                     </Grid>
 
-                    <Border IsVisible="{Binding !HasPageLoaded}"
-                            Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
-                            Padding="40"
-                            CornerRadius="4">
-                        <TextBlock Text="Select a wiki file to view its contents"
-                                   TextAlignment="Center"
-                                   FontSize="14"
-                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
-                    </Border>
-
-                    <ScrollViewer IsVisible="{Binding HasPageLoaded}"
+                    <ScrollViewer
                                   HorizontalScrollBarVisibility="Auto"
                                   VerticalScrollBarVisibility="Auto">
                         <TextBox Text="{Binding PageContent}"

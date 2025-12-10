@@ -97,6 +97,14 @@ public partial class WikiBrowserViewModel : ViewModelBase
         HasWikiLoaded = !string.IsNullOrEmpty(WikiRootPath) && FolderTree.Count > 0;
     }
 
+    public void ClearPageContent()
+    {
+        SelectedNode = null;
+        PageContent = string.Empty;
+        SelectedPageName = string.Empty;
+        HasPageLoaded = false;
+    }
+
     [RelayCommand]
     private async Task OpenConverterDialogAsync()
     {
@@ -222,25 +230,22 @@ public partial class WikiBrowserViewModel : ViewModelBase
 
     private void LoadPageContent(FolderTreeNode node)
     {
+        SelectedPageName = node.Name;
+
         if (!File.Exists(node.FullPath))
         {
             PageContent = "File not found";
-            SelectedPageName = node.Name;
-            HasPageLoaded = true;
             return;
         }
 
         try
         {
             PageContent = File.ReadAllText(node.FullPath);
-            SelectedPageName = node.Name;
             HasPageLoaded = true;
         }
         catch (Exception ex)
         {
             PageContent = $"Error loading file: {ex.Message}";
-            SelectedPageName = node.Name;
-            HasPageLoaded = true;
         }
     }
 }
