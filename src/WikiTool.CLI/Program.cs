@@ -33,7 +33,7 @@ class Program
 
         var formatOption = new Option<string>(
             name: "--from",
-            description: "Source wiki format (wikidpad)")
+            description: "Source wiki format (wikidpad, obsidian)")
         {
             IsRequired = true
         };
@@ -41,7 +41,7 @@ class Program
 
         var toFormatOption = new Option<string>(
             name: "--to",
-            description: "Destination wiki format (obsidian)")
+            description: "Destination wiki format (obsidian, markdown)")
         {
             IsRequired = true
         };
@@ -60,16 +60,27 @@ class Program
                 Console.WriteLine($"Source: {source}");
                 Console.WriteLine($"Destination: {dest}");
 
-                if (from.ToLower() == "wikidpad" && to.ToLower() == "obsidian")
+                var fromLower = from.ToLower();
+                var toLower = to.ToLower();
+
+                if (fromLower == "wikidpad" && toLower == "obsidian")
                 {
                     var converter = new WikidPadToObsidianConverter(source, dest);
+                    converter.ConvertAll();
+                    Console.WriteLine("Conversion completed successfully!");
+                }
+                else if (fromLower == "obsidian" && (toLower == "markdown" || toLower == "md"))
+                {
+                    var converter = new ObsidianToMarkdownWikiConverter(source, dest);
                     converter.ConvertAll();
                     Console.WriteLine("Conversion completed successfully!");
                 }
                 else
                 {
                     Console.WriteLine($"Error: Conversion from {from} to {to} is not yet supported.");
-                    Console.WriteLine("Currently supported: wikidpad -> obsidian");
+                    Console.WriteLine("Currently supported conversions:");
+                    Console.WriteLine("  wikidpad -> obsidian");
+                    Console.WriteLine("  obsidian -> markdown (or md)");
                 }
             }
             catch (Exception ex)
