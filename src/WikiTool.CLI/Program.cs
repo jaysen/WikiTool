@@ -72,6 +72,31 @@ class Program
                 else if (fromLower == "obsidian" && (toLower == "markdown" || toLower == "md"))
                 {
                     var converter = new ObsidianToMarkdownWikiConverter(source, dest);
+
+                    // Set up ambiguous link resolver for CLI
+                    converter.OnAmbiguousLink = (linkText, possiblePaths, sourceFile) =>
+                    {
+                        Console.WriteLine($"\nAmbiguous link '{linkText}' found in {sourceFile}");
+                        Console.WriteLine("Multiple pages have this name:");
+
+                        for (int i = 0; i < possiblePaths.Count; i++)
+                        {
+                            Console.WriteLine($"  {i + 1}. {possiblePaths[i]}");
+                        }
+
+                        Console.Write($"Choose option (1-{possiblePaths.Count}): ");
+
+                        while (true)
+                        {
+                            var input = Console.ReadLine();
+                            if (int.TryParse(input, out int choice) && choice >= 1 && choice <= possiblePaths.Count)
+                            {
+                                return possiblePaths[choice - 1];
+                            }
+                            Console.Write($"Invalid choice. Please enter a number between 1 and {possiblePaths.Count}: ");
+                        }
+                    };
+
                     converter.ConvertAll();
                     Console.WriteLine("Conversion completed successfully!");
                 }
