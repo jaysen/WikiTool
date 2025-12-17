@@ -4,15 +4,15 @@ using WikiTool.Converters;
 using WikiTool.Wikis;
 using Xunit;
 
-namespace WikiTool.Tests;
+namespace WikiTool.Tests.Converters.ObsidianToMarkdown;
 
-public class ObsidianToMarkdownWikiConverterTests
+public class ConverterTests
 {
     private readonly string _testFolder;
     private readonly string _sourceDir;
     private readonly string _destDir;
 
-    public ObsidianToMarkdownWikiConverterTests()
+    public ConverterTests()
     {
         _testFolder = TestUtilities.GetTestFolder("obsidian_to_mdwiki_tests");
         _sourceDir = Path.Combine(_testFolder, "source");

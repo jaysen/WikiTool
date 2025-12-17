@@ -4,19 +4,19 @@ using WikiTool.Converters;
 using WikiTool.Wikis;
 using Xunit;
 
-namespace WikiTool.Tests.Converters;
+namespace WikiTool.Tests.Converters.ObsidianToMarkdown;
 
 /// <summary>
 /// Tests for ObsidianToMarkdownWikiConverter focusing on relative path handling
 /// for nested folder structures and cross-folder links.
 /// </summary>
-public class ObsidianToMarkdownWikiConverterWithRelativePathsTests
+public class RelativePathsTests
 {
     private readonly string _testFolder;
     private readonly string _sourceDir;
     private readonly string _destDir;
 
-    public ObsidianToMarkdownWikiConverterWithRelativePathsTests()
+    public RelativePathsTests()
     {
         _testFolder = TestUtilities.GetTestFolder("obsidian_mdwiki_relative_paths");
         _sourceDir = Path.Combine(_testFolder, "source");

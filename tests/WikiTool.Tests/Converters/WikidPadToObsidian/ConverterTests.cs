@@ -5,15 +5,15 @@ using System.Linq;
 using WikiTool.Converters;
 using Xunit;
 
-namespace WikiTool.Tests;
+namespace WikiTool.Tests.Converters.WikidPadToObsidian;
 
-public class WikidPadToObsidianConverterTests
+public class ConverterTests
 {
     private readonly string _testFolder;
     private readonly string _sourceDir;
     private readonly string _destDir;
 
-    public WikidPadToObsidianConverterTests()
+    public ConverterTests()
     {
         _testFolder = TestUtilities.GetTestFolder("wikidpad_converter_tests");
         _sourceDir = Path.Combine(_testFolder, "source");
