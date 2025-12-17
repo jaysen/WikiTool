@@ -53,6 +53,9 @@ public class WikiPageIndexTests
         Assert.Single(index["PageOne"]);
         Assert.Single(index["PageTwo"]);
         Assert.Single(index["PageThree"]);
+        // Verify paths are relative
+        Assert.Equal("PageOne.md", index["PageOne"][0]);
+        Assert.Equal("PageTwo.md", index["PageTwo"][0]);
     }
 
     [Fact]
@@ -73,7 +76,9 @@ public class WikiPageIndexTests
 
         // Assert
         Assert.Single(index); // One entry for "Overview"
-        Assert.Equal(2, index["Overview"].Count); // But two pages with that name
+        Assert.Equal(2, index["Overview"].Count); // But two paths with that name
+        Assert.Contains("Overview.md", index["Overview"]);
+        Assert.Contains(Path.Combine("docs", "Overview.md"), index["Overview"]);
     }
 
     [Fact]

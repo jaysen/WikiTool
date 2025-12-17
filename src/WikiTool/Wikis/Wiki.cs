@@ -17,12 +17,12 @@ public abstract class Wiki
     public abstract WikiSyntax Syntax { get; }
 
     /// <summary>
-    /// Lazy-loaded index mapping page names to their corresponding Page objects.
+    /// Lazy-loaded index mapping page names to their file paths (relative to wiki root).
     /// Allows efficient lookup when multiple pages may have the same name.
     /// Case-insensitive matching.
     /// </summary>
-    private Dictionary<string, List<Page>> _pageNameIndex;
-    public Dictionary<string, List<Page>> PageNameIndex
+    private Dictionary<string, List<string>> _pageNameIndex;
+    public Dictionary<string, List<string>> PageNameIndex
     {
         get
         {
@@ -35,21 +35,32 @@ public abstract class Wiki
     }
 
     /// <summary>
-    /// Builds an index of page names to Page objects.
+    /// Builds an index of page names to their relative file paths.
     /// Override this method if you need custom indexing behavior.
     /// </summary>
-    protected virtual Dictionary<string, List<Page>> BuildPageNameIndex()
+    protected virtual Dictionary<string, List<string>> BuildPageNameIndex()
     {
-        var index = new Dictionary<string, List<Page>>(StringComparer.OrdinalIgnoreCase);
+        var index = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
         var pages = GetAllPages();
 
         foreach (var page in pages)
         {
             if (!index.ContainsKey(page.Name))
             {
-                index[page.Name] = new List<Page>();
+                index[page.Name] = new List<string>();
             }
-            index[page.Name].Add(page);
+
+            // Store path relative to wiki root if it's a LocalPage
+            if (page is LocalPage localPage && this is LocalWiki localWiki)
+            {
+                var relativePath = System.IO.Path.GetRelativePath(localWiki.RootPath, localPage.PagePath);
+                index[page.Name].Add(relativePath);
+            }
+            else
+            {
+                // Fallback for non-local pages
+                index[page.Name].Add(page.Name);
+            }
         }
 
         return index;
