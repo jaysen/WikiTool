@@ -71,6 +71,43 @@ public partial class ObsidianToMarkdownWikiConverter
         {
             ConvertPage(page);
         }
+
+        // Copy non-markdown files (images, PDFs, attachments, etc.)
+        CopyNonMarkdownFiles();
+    }
+
+    /// <summary>
+    /// Copies non-markdown files from source to destination, preserving folder structure
+    /// </summary>
+    private void CopyNonMarkdownFiles()
+    {
+        // Get all files in source directory recursively
+        var allFiles = Directory.GetFiles(SourcePath, "*", SearchOption.AllDirectories);
+
+        foreach (var sourceFile in allFiles)
+        {
+            // Skip markdown files as they're already converted
+            if (sourceFile.EndsWith(".md", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            // Calculate relative path from source root
+            var relativePath = Path.GetRelativePath(SourcePath, sourceFile);
+
+            // Create destination path preserving folder structure
+            var destFile = Path.Combine(DestinationPath, relativePath);
+            var destDirectory = Path.GetDirectoryName(destFile);
+
+            // Ensure destination directory exists
+            if (!string.IsNullOrEmpty(destDirectory) && !Directory.Exists(destDirectory))
+            {
+                Directory.CreateDirectory(destDirectory);
+            }
+
+            // Copy the file
+            File.Copy(sourceFile, destFile, overwrite: true);
+        }
     }
 
     /// <summary>
@@ -236,8 +273,15 @@ public partial class ObsidianToMarkdownWikiConverter
             return targetMdPath;
         }
 
-        // Calculate relative path
-        var relativePath = Path.GetRelativePath(sourceDir, targetMdPath);
+        // Path.GetRelativePath requires absolute paths or both paths to be rooted to same base
+        // Since we have relative paths, we need to make them absolute temporarily
+        // Use a dummy root to make calculations work correctly
+        var dummyRoot = Path.GetTempPath();
+        var absoluteSource = Path.Combine(dummyRoot, sourceDir);
+        var absoluteTarget = Path.Combine(dummyRoot, targetMdPath);
+
+        // Calculate relative path from source directory to target file
+        var relativePath = Path.GetRelativePath(absoluteSource, absoluteTarget);
 
         // Normalize path separators to forward slashes for markdown
         return relativePath.Replace(Path.DirectorySeparatorChar, '/');

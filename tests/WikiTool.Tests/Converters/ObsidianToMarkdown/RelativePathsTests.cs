@@ -475,8 +475,9 @@ public class RelativePathsTests
 
     private void SetupSourceDirectory()
     {
-        if (!Directory.Exists(_sourceDir))
-            Directory.CreateDirectory(_sourceDir);
+        if (Directory.Exists(_sourceDir))
+            Directory.Delete(_sourceDir, true);
+        Directory.CreateDirectory(_sourceDir);
     }
 
     #endregion
