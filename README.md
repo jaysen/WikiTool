@@ -13,7 +13,7 @@ A .NET library, CLI tool, and desktop application for working with various wiki 
 
 ## Requirements
 
-- .NET 9.0 SDK
+- .NET 10.0 SDK
 
 ## Development Setup
 
@@ -42,7 +42,7 @@ Open this repository in VS Code with the Dev Containers extension, or use GitHub
 
 ### Option 3: Local Installation
 
-Install .NET 9.0 SDK on your system directly.
+Install .NET 10.0 SDK on your system directly.
 
 ## Building
 
