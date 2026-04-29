@@ -22,6 +22,7 @@ distrobox enter dotnetbox
 ```
 
 **What you get:**
+
 - .NET 10 SDK (from Fedora repos)
 - Avalonia GUI dependencies
 
@@ -29,6 +30,7 @@ distrobox enter dotnetbox
 ## Troubleshooting
 
 **GUI apps not displaying:**
+
 ```bash
 echo $DISPLAY  # Should show :0 or similar
 ```
