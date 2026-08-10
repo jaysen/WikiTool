@@ -23,10 +23,10 @@ public partial class ObsidianSyntax : WikiSyntax
     public override Regex LinkPattern => LinkPatternRegex();
 
     /// <summary>
-    /// Pattern for matching inline tags: #tagname
+    /// Pattern for matching inline tags: #tagname, including nested tags such as #status/wip
     /// Matches after whitespace or at start of line
     /// </summary>
-    [GeneratedRegex(@"(?:^|\s)#([a-zA-Z0-9_-]+)", RegexOptions.Multiline)]
+    [GeneratedRegex(@"(?:^|\s)#([a-zA-Z0-9_/-]+)", RegexOptions.Multiline)]
     private static partial Regex TagPatternRegex();
     public override Regex TagPattern => TagPatternRegex();
 

@@ -48,32 +48,9 @@ public class ObsidianPage : LocalPage
             GetContent();
         }
 
-        var aliases = new List<string>();
-        var content = GetContent();
-
-        // Use syntax patterns from parent wiki
-        var syntax = (_wiki?.Syntax as ObsidianSyntax) ?? ObsidianSyntax.Default;
-
-        // Check for YAML frontmatter aliases
-        var yamlMatch = ObsidianSyntax.YamlPattern.Match(content);
-
-        if (yamlMatch.Success)
-        {
-            var frontmatter = yamlMatch.Groups[1].Value;
-            var aliasMatch = syntax.AliasPattern.Match(frontmatter);
-
-            if (aliasMatch.Success)
-            {
-                var aliasString = aliasMatch.Groups[1].Value;
-                var parts = aliasString.Split(',');
-                foreach (var part in parts)
-                {
-                    aliases.Add(part.Trim().Trim('"', '\''));
-                }
-            }
-        }
-
-        return aliases;
+        // Read through YamlFrontmatter so both the inline-array form (aliases: [a, b])
+        // and the block-list form emitted by WikidPadToObsidianConverter are understood
+        return YamlFrontmatter.Parse(GetContent()).GetList("aliases");
     }
 
     public override List<string> GetTags()
@@ -101,26 +78,12 @@ public class ObsidianPage : LocalPage
             }
         }
 
-        // Also check YAML frontmatter
-        var yamlMatch = ObsidianSyntax.YamlPattern.Match(content);
-
-        if (yamlMatch.Success)
+        // Also check YAML frontmatter, in either the inline-array or block-list form
+        foreach (var tag in YamlFrontmatter.Parse(content).GetList("tags"))
         {
-            var frontmatter = yamlMatch.Groups[1].Value;
-            var tagMatch = ObsidianSyntax.YamlTagPattern.Match(frontmatter);
-
-            if (tagMatch.Success)
+            if (!tags.Contains(tag))
             {
-                var tagString = tagMatch.Groups[1].Value;
-                var parts = tagString.Split(',');
-                foreach (var part in parts)
-                {
-                    var tag = part.Trim().Trim('"', '\'');
-                    if (!tags.Contains(tag))
-                    {
-                        tags.Add(tag);
-                    }
-                }
+                tags.Add(tag);
             }
         }
 
