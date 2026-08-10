@@ -14,7 +14,7 @@
         MinHeight="500"
         CanResize="True"
         WindowStartupLocation="CenterOwner"
-        SystemDecorations="Full">
+        WindowDecorations="Full">
 
     <Design.DataContext>
         <vm:ConverterViewModel/>

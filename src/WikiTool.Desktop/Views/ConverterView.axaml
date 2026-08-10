@@ -16,7 +16,7 @@
                 <Grid ColumnDefinitions="*,Auto">
                     <TextBox Grid.Column="0"
                              Text="{Binding SourcePath}"
-                             Watermark="Select source folder..."
+                             PlaceholderText="Select source folder..."
                              Margin="0,0,10,0"/>
                     <Button Grid.Column="1"
                             Content="Browse..."
@@ -34,7 +34,7 @@
                 <Grid ColumnDefinitions="*,Auto">
                     <TextBox Grid.Column="0"
                              Text="{Binding DestinationPath}"
-                             Watermark="Select destination folder..."
+                             PlaceholderText="Select destination folder..."
                              Margin="0,0,10,0"/>
                     <Button Grid.Column="1"
                             Content="Browse..."
