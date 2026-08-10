@@ -7,7 +7,8 @@ A .NET library, CLI tool, and desktop application for working with various wiki 
 - **WikidPad Support**: Read and parse WikidPad `.wiki` files
 - **Obsidian Support**: Read and parse Obsidian `.md` files
 - **Markdown Wiki Support**: Read and parse using Markdown links
-- **Format Conversion**: Convert between wikis - WikidPad to Obsidian done. 
+- **Format Conversion**: Convert between wikis - WikidPad to Obsidian and Obsidian to Markdown done.
+- **GitHub Pages Output**: The Markdown wiki publishes straight to GitHub Pages
 - **CLI Tool**: Command-line interface for easy conversions
 - **Desktop GUI**: Cross-platform Avalonia-based desktop application - Converter done
 
@@ -100,7 +101,20 @@ dotnet run --project src/WikiTool.CLI -- convert \
   -d /path/to/obsidian
 ```
 
-### Conversion Details
+Convert an Obsidian vault to a GitHub Pages ready Markdown wiki:
+
+```bash
+dotnet run --project src/WikiTool.CLI -- convert \
+  --from obsidian \
+  --to markdown \
+  --source /path/to/vault \
+  --dest ./docs
+```
+
+Supported routes are `wikidpad -> obsidian` and `obsidian -> markdown`, so a WikidPad
+wiki can be taken all the way to a published site in two steps.
+
+### WikidPad to Obsidian
 
 The converter handles the following WikidPad syntax:
 
@@ -143,6 +157,73 @@ aliases:
 Content here
 ```
 
+### Obsidian to Markdown Wiki
+
+Converts an Obsidian vault into plain Markdown that publishes to GitHub Pages.
+
+| Obsidian Format | Markdown Wiki Format | Example |
+|----------------|----------------------|---------|
+| Wikilinks | Relative Markdown links | `[[Beta]]` → `[Beta](beta.md)` |
+| Piped links | Markdown link text | `[[Beta\|the notes]]` → `[the notes](beta.md)` |
+| Heading links | Anchor links | `[[Beta#Setup]]` → `[Beta > Setup](beta.md#setup)` |
+| Same-page headings | Bare anchors | `[[#Risks]]` → `[Risks](#risks)` |
+| Inline tags | YAML frontmatter | `#project` → `tags:` in frontmatter |
+| Aliases | Jekyll redirects | `aliases:` → `redirect_from:` |
+| Filenames | URL-safe slugs | `Alpha Project.md` → `alpha-project.md` |
+| Broken links | Bold text | `[[Ghost]]` → `**Ghost**` |
+
+**Notes:**
+- Links resolve by page name against the whole vault, exactly as Obsidian does, including
+  case-insensitive matches, paths (`[[Projects/Alpha]]`), and aliases. This is why the
+  conversion is two-pass: every page must be indexed before any page can be rewritten.
+- The original page name is kept as `title:` in frontmatter, so slugging loses nothing.
+  A `title:` the author set explicitly takes precedence over the filename.
+- Links that resolve to nothing become bold text rather than links that would 404, and
+  every one is reported as a warning at the end of the run.
+- `[[links]]` and `#tags` inside code blocks and code spans are left alone.
+- Block references (`[[Page#^blockid]]`) link to the page, since Markdown has no equivalent.
+- `.obsidian/` and other dot-folders are skipped.
+
+**Not converted.** These pass through unchanged, and will render as literal text:
+
+- Embeds and attachments (`![[image.png]]`) - referenced files are not copied
+- Callouts (`> [!note]`) - remain plain blockquotes
+- Dataview inline fields (`[key:: value]`)
+
+#### Publishing to GitHub Pages
+
+Convert into a `docs/` folder at the root of your repository:
+
+```bash
+dotnet run --project src/WikiTool.CLI -- convert -f obsidian -t markdown -s /path/to/vault -d ./docs
+```
+
+Then commit, and in the repository go to **Settings → Pages → Deploy from a branch**, and
+pick your branch with the **`/docs`** folder.
+
+No CI workflow is needed. GitHub Pages builds Jekyll itself and enables the
+`jekyll-relative-links` plugin by default, which rewrites the relative `page.md` links to
+`.html` at build time. That is what lets the same files read correctly both when browsing
+the repository on github.com and when served from Pages.
+
+Alongside the converted pages the converter writes:
+
+- `_config.yml` - theme and the plugin settings the links depend on
+- `index.md` - a home page listing every page, grouped by folder
+- `tags.md` - a tag index listing the pages under each tag
+
+An existing `_config.yml` is never overwritten without `--force`, and the generated home
+page is skipped if the vault already produced one.
+
+Options for this conversion:
+
+| Option | Effect |
+|--------|--------|
+| `--no-scaffolding` | Emit only the converted Markdown, no `_config.yml`/`index.md`/`tags.md` |
+| `--keep-inline-tags` | Leave `#tags` in the body instead of hoisting them to frontmatter |
+| `--site-title` | Title for the generated site (defaults to the source folder name) |
+| `--force` | Overwrite generated site files that already exist |
+
 ### Library Usage
 
 ```csharp
@@ -165,6 +246,28 @@ converter.ConvertCategoryTags = true;
 converter.ConvertAll();
 ```
 
+Converting an Obsidian vault to a GitHub Pages ready Markdown wiki:
+
+```csharp
+using WikiTool.Converters;
+
+var converter = new ObsidianToMarkdownConverter(
+    "/path/to/vault",
+    "./docs"
+)
+{
+    SiteTitle = "My Wiki"
+};
+
+converter.ConvertAll();
+
+// Unresolved links, duplicate page names and filename collisions are reported here
+foreach (var warning in converter.Warnings)
+{
+    Console.WriteLine(warning);
+}
+```
+
 ## Project Structure
 
 ```
@@ -172,8 +275,8 @@ WikiTool/
 ├── src/
 │   ├── WikiTool/                # Core library
 │   │   ├── Pages/               # Page implementations
-│   │   ├── Wikis/               # Wiki implementations
-│   │   └── Converters/          # Format converters
+│   │   ├── Wikis/               # Wiki implementations and syntax definitions
+│   │   └── Converters/          # Format converters and site generation
 │   ├── WikiTool.CLI/            # Command-line interface
 │   └── WikiTool.Desktop/        # Avalonia desktop GUI
 │       ├── Services/            # UI services (folder picker, etc.)
