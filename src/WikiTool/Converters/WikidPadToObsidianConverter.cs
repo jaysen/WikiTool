@@ -285,7 +285,7 @@ public class WikidPadToObsidianConverter
                 var sb = new StringBuilder();
                 foreach (var alias in aliases)
                 {
-                    sb.AppendLine($"  - {alias}");
+                    sb.Append($"  - {alias}\n");
                 }
 
                 var updatedYaml = existingYaml.Insert(insertPosition, sb.ToString());
@@ -295,11 +295,11 @@ public class WikidPadToObsidianConverter
             {
                 // No aliases section - add it to the end of existing frontmatter
                 var sb = new StringBuilder();
-                sb.AppendLine(existingYaml.TrimEnd());
-                sb.AppendLine("aliases:");
+                sb.Append(existingYaml.TrimEnd()).Append('\n');
+                sb.Append("aliases:\n");
                 foreach (var alias in aliases)
                 {
-                    sb.AppendLine($"  - {alias}");
+                    sb.Append($"  - {alias}\n");
                 }
                 return $"---\n{sb}---\n{contentAfterYaml}";
             }
@@ -317,13 +317,13 @@ public class WikidPadToObsidianConverter
     private static string GenerateYamlFrontmatter(List<string> aliases)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("---");
-        sb.AppendLine("aliases:");
+        sb.Append("---\n");
+        sb.Append("aliases:\n");
         foreach (var alias in aliases)
         {
-            sb.AppendLine($"  - {alias}");
+            sb.Append($"  - {alias}\n");
         }
-        sb.AppendLine("---");
+        sb.Append("---\n");
         return sb.ToString();
     }
 }
