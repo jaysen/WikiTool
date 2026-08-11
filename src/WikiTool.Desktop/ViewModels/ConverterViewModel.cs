@@ -19,14 +19,33 @@ public partial class ConverterViewModel : ViewModelBase
     }
 
     // Observable Properties
+    public ConversionModeOption[] ConversionModes => ConversionModeOption.All;
+
+    [ObservableProperty]
+    private ConversionModeOption _selectedConversionMode = ConversionModeOption.All[0];
+
     [ObservableProperty]
     private string _sourcePath = string.Empty;
 
     [ObservableProperty]
     private string _destinationPath = string.Empty;
 
+    // WikidPad -> Obsidian options
     [ObservableProperty]
     private bool _convertCategoryTags = false;
+
+    // Obsidian -> Markdown (GitHub Pages) options
+    [ObservableProperty]
+    private bool _generateSiteFiles = true;
+
+    [ObservableProperty]
+    private bool _keepInlineTags = false;
+
+    [ObservableProperty]
+    private string _siteTitle = string.Empty;
+
+    [ObservableProperty]
+    private bool _forceOverwrite = false;
 
     [ObservableProperty]
     private bool _isConverting = false;
@@ -46,12 +65,28 @@ public partial class ConverterViewModel : ViewModelBase
     [ObservableProperty]
     private string? _destinationPathError;
 
-    // Computed Property
+    // Computed Properties
     public bool CanConvert => !string.IsNullOrWhiteSpace(SourcePath)
                            && !string.IsNullOrWhiteSpace(DestinationPath)
                            && !IsConverting
                            && string.IsNullOrEmpty(SourcePathError)
                            && string.IsNullOrEmpty(DestinationPathError);
+
+    public bool IsWikidPadToObsidian => SelectedConversionMode.Mode == ConversionMode.WikidPadToObsidian;
+
+    public bool IsObsidianToMarkdown => SelectedConversionMode.Mode == ConversionMode.ObsidianToMarkdown;
+
+    public string SourceLabel => IsWikidPadToObsidian ? "Source WikidPad Folder:" : "Source Obsidian Vault Folder:";
+
+    public string DestinationLabel => IsWikidPadToObsidian ? "Destination Obsidian Folder:" : "Destination Markdown Site Folder:";
+
+    partial void OnSelectedConversionModeChanged(ConversionModeOption value)
+    {
+        OnPropertyChanged(nameof(IsWikidPadToObsidian));
+        OnPropertyChanged(nameof(IsObsidianToMarkdown));
+        OnPropertyChanged(nameof(SourceLabel));
+        OnPropertyChanged(nameof(DestinationLabel));
+    }
 
     // Validation Partial Methods
     partial void OnSourcePathChanged(string value)
@@ -131,20 +166,51 @@ public partial class ConverterViewModel : ViewModelBase
 
             var logBuilder = new StringBuilder();
             logBuilder.AppendLine($"=== Conversion Started: {DateTime.Now:yyyy-MM-dd HH:mm:ss} ===");
+            logBuilder.AppendLine($"Mode: {SelectedConversionMode.DisplayName}");
             logBuilder.AppendLine($"Source: {SourcePath}");
             logBuilder.AppendLine($"Destination: {DestinationPath}");
-            logBuilder.AppendLine($"Convert Category Tags: {ConvertCategoryTags}");
             logBuilder.AppendLine();
 
             await Task.Run(() =>
             {
-                var converter = new WikidPadToObsidianConverter(SourcePath, DestinationPath)
+                if (IsWikidPadToObsidian)
                 {
-                    ConvertCategoryTags = ConvertCategoryTags
-                };
+                    logBuilder.AppendLine($"Convert Category Tags: {ConvertCategoryTags}");
+                    logBuilder.AppendLine("Converting WikidPad files to Obsidian format...");
 
-                logBuilder.AppendLine("Converting WikidPad files to Obsidian format...");
-                converter.ConvertAll();
+                    var converter = new WikidPadToObsidianConverter(SourcePath, DestinationPath)
+                    {
+                        ConvertCategoryTags = ConvertCategoryTags
+                    };
+                    converter.ConvertAll();
+                }
+                else
+                {
+                    logBuilder.AppendLine($"Generate Site Files: {GenerateSiteFiles}");
+                    logBuilder.AppendLine($"Keep Inline Tags: {KeepInlineTags}");
+                    logBuilder.AppendLine($"Force Overwrite: {ForceOverwrite}");
+                    logBuilder.AppendLine("Converting Obsidian vault to Markdown (GitHub Pages) format...");
+
+                    var converter = new ObsidianToMarkdownConverter(SourcePath, DestinationPath)
+                    {
+                        GenerateSiteFiles = GenerateSiteFiles,
+                        StripInlineTags = !KeepInlineTags,
+                        SiteTitle = string.IsNullOrWhiteSpace(SiteTitle) ? null : SiteTitle,
+                        Force = ForceOverwrite
+                    };
+                    converter.ConvertAll();
+
+                    if (converter.Warnings.Count > 0)
+                    {
+                        logBuilder.AppendLine();
+                        logBuilder.AppendLine($"{converter.Warnings.Count} warning(s):");
+                        foreach (var warning in converter.Warnings)
+                        {
+                            logBuilder.AppendLine($"  - {warning}");
+                        }
+                    }
+                }
+
                 logBuilder.AppendLine("Conversion completed successfully!");
             });
 

@@ -10,9 +10,23 @@
     <DockPanel>
         <!-- Conversion Panel (Top) -->
         <StackPanel DockPanel.Dock="Top" Spacing="15">
+            <!-- Conversion Mode -->
+            <StackPanel Spacing="5">
+                <TextBlock Text="Conversion:" FontWeight="SemiBold"/>
+                <ComboBox ItemsSource="{Binding ConversionModes}"
+                          SelectedItem="{Binding SelectedConversionMode}"
+                          HorizontalAlignment="Stretch">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ConversionModeOption">
+                            <TextBlock Text="{Binding DisplayName}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </StackPanel>
+
             <!-- Source Folder -->
             <StackPanel Spacing="5">
-                <TextBlock Text="Source WikidPad Folder:" FontWeight="SemiBold"/>
+                <TextBlock Text="{Binding SourceLabel}" FontWeight="SemiBold"/>
                 <Grid ColumnDefinitions="*,Auto">
                     <TextBox Grid.Column="0"
                              Text="{Binding SourcePath}"
@@ -30,7 +44,7 @@
 
             <!-- Destination Folder -->
             <StackPanel Spacing="5">
-                <TextBlock Text="Destination Obsidian Folder:" FontWeight="SemiBold"/>
+                <TextBlock Text="{Binding DestinationLabel}" FontWeight="SemiBold"/>
                 <Grid ColumnDefinitions="*,Auto">
                     <TextBox Grid.Column="0"
                              Text="{Binding DestinationPath}"
@@ -46,11 +60,25 @@
                            IsVisible="{Binding DestinationPathError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
             </StackPanel>
 
-            <!-- Options -->
-            <StackPanel Spacing="5">
+            <!-- WikidPad -> Obsidian Options -->
+            <StackPanel Spacing="5" IsVisible="{Binding IsWikidPadToObsidian}">
                 <TextBlock Text="Options:" FontWeight="SemiBold"/>
                 <CheckBox Content="Convert Category Tags (CategoryName → #Name)"
                           IsChecked="{Binding ConvertCategoryTags}"/>
+            </StackPanel>
+
+            <!-- Obsidian -> Markdown (GitHub Pages) Options -->
+            <StackPanel Spacing="5" IsVisible="{Binding IsObsidianToMarkdown}">
+                <TextBlock Text="Options:" FontWeight="SemiBold"/>
+                <CheckBox Content="Generate site files (_config.yml, index.md, tags.md)"
+                          IsChecked="{Binding GenerateSiteFiles}"/>
+                <CheckBox Content="Keep inline #tags in page body (instead of moving to frontmatter)"
+                          IsChecked="{Binding KeepInlineTags}"/>
+                <CheckBox Content="Force overwrite of existing generated site files"
+                          IsChecked="{Binding ForceOverwrite}"/>
+                <TextBlock Text="Site Title (optional):" Margin="0,5,0,0"/>
+                <TextBox Text="{Binding SiteTitle}"
+                         PlaceholderText="Defaults to the source folder name"/>
             </StackPanel>
 
             <!-- Convert Button -->
