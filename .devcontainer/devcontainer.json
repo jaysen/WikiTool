@@ -1,28 +1,50 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/dotnet
 {
-    "name": "C# (.NET)",
-    "image": "mcr.microsoft.com/devcontainers/dotnet:1-10.0-bookworm",
-    
+    "name": "dotnet-gui (.NET 10 / Avalonia 12)",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+
+    // desktop-lite gives us an X11 display + noVNC so the Avalonia desktop
+    // app can actually be opened and viewed (browser to http://localhost:6080).
+    "features": {
+        "ghcr.io/devcontainers/features/desktop-lite:1": {}
+    },
+
+    // Native libs Avalonia/SkiaSharp need at runtime that aren't in the base image.
+    "onCreateCommand": "sudo apt-get update && sudo apt-get install -y libfontconfig1 libice6 libsm6 libx11-6",
+
+    // Restore all projects (CLI, Desktop, tests) so first build/test is fast.
+    "postCreateCommand": "dotnet restore WikiTool.sln",
+
+    "forwardPorts": [6080],
+    "portsAttributes": {
+        "6080": {
+            "label": "noVNC (Avalonia desktop app)"
+        }
+    },
+
     // // Mount SSH agent socket
     // "mounts": [
     //     "source=${localEnv:SSH_AUTH_SOCK},target=/ssh-agent,type=bind,consistency=cached"
     // ],
-    
+
     // // Set SSH_AUTH_SOCK inside container
     // "containerEnv": {
     //     "SSH_AUTH_SOCK": "/ssh-agent"
     // },
-       
+
     // VS Code extensions
     "customizations": {
         "vscode": {
             "extensions": [
                 "ms-dotnettools.csharp",
                 "ms-dotnettools.csdevkit",
-                "ms-dotnettools.vscode-dotnet-pack"
+                "ms-dotnettools.vscode-dotnet-pack",
+                "AvaloniaTeam.vscode-avalonia"
             ]
         }
     }
-    
+
 }
