@@ -118,7 +118,7 @@
                             Padding="10"
                             CornerRadius="4"
                             Margin="0,0,0,10">
-                        <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto">
+                        <Grid ColumnDefinitions="Auto,*,Auto,Auto">
                             <TextBlock Grid.Column="0"
                                        Text="Select Pages to Copy"
                                        FontSize="16"
@@ -130,12 +130,14 @@
                                         Spacing="8"
                                         HorizontalAlignment="Right"
                                         Margin="0,0,15,0">
-                                <TextBox Width="220"
+                                <TextBox MinWidth="120"
+                                         Width="220"
                                          Text="{Binding SearchStr}"
                                          PlaceholderText="Search page contents..."
                                          VerticalAlignment="Center"/>
                                 <Button Content="Select Matches"
                                         Command="{Binding SelectBySearchStrCommand}"
+                                        IsEnabled="{Binding !IsProcessing}"
                                         Padding="10,5"/>
                             </StackPanel>
 
@@ -150,7 +152,7 @@
                                         Padding="10,5"/>
                             </StackPanel>
 
-                            <TextBlock Grid.Column="4"
+                            <TextBlock Grid.Column="3"
                                        Text="{Binding SelectedPageCount, StringFormat='{}{0} selected'}"
                                        VerticalAlignment="Center"
                                        Margin="15,0,0,0"

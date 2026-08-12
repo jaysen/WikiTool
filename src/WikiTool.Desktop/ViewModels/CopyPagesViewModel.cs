@@ -201,19 +201,43 @@ public partial class CopyPagesViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void SelectBySearchStr()
+    private async Task SelectBySearchStrAsync()
     {
-        if (SourceWiki == null || string.IsNullOrWhiteSpace(SearchStr))
+        if (SourceWiki == null
+            || string.IsNullOrWhiteSpace(SourceWiki.WikiRootPath)
+            || string.IsNullOrWhiteSpace(SearchStr)
+            || IsProcessing)
         {
             return;
         }
 
-        var wiki = WikiFactory.CreateForPath(SourceWiki.WikiRootPath);
-        var matchedPages = wiki.GetPagesBySearchStr(SearchStr);
-        var matchedPaths = matchedPages.OfType<LocalPage>().Select(p => p.PagePath);
+        var rootPath = SourceWiki.WikiRootPath;
+        var searchStr = SearchStr;
 
-        SelectPagesMatching(matchedPaths);
-        StatusMessage = $"{SelectedPageCount} page(s) matched '{SearchStr}'";
+        IsProcessing = true;
+        StatusMessage = $"Searching pages for '{searchStr}'...";
+
+        try
+        {
+            // Reading every page is slow on large wikis, so keep it off the UI thread.
+            var matchedPaths = await Task.Run(() =>
+                WikiFactory.CreateForPath(rootPath)
+                    .GetPagesBySearchStr(searchStr, StringComparison.OrdinalIgnoreCase)
+                    .OfType<LocalPage>()
+                    .Select(p => p.PagePath)
+                    .ToList());
+
+            SelectPagesMatching(matchedPaths);
+            StatusMessage = $"{SelectedPageCount} page(s) matched '{searchStr}'";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Error searching pages: {ex.Message}";
+        }
+        finally
+        {
+            IsProcessing = false;
+        }
     }
 
     private void SelectPagesMatching(IEnumerable<string> matchedPaths)
