@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WikiTool.Pages;
 
@@ -21,11 +22,12 @@ public abstract class Wiki
     public abstract List<Page> GetAllPages();
 
     /// <summary>
-    /// Populates and returns SelectedPages with all pages whose content contains searchStr
+    /// Populates and returns SelectedPages with all pages whose content contains searchStr.
+    /// Matching is case-sensitive unless an alternative comparison such as OrdinalIgnoreCase is supplied.
     /// </summary>
-    public virtual List<Page> GetPagesBySearchStr(string searchStr)
+    public virtual List<Page> GetPagesBySearchStr(string searchStr, StringComparison comparison = StringComparison.Ordinal)
     {
-        SelectedPages = GetAllPages().Where(page => page.ContainsText(searchStr)).ToList();
+        SelectedPages = GetAllPages().Where(page => page.ContainsText(searchStr, comparison)).ToList();
         return SelectedPages;
     }
 

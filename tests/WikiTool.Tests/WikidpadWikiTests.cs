@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text;
 using WikiTool;
 using WikiTool.Wikis;
@@ -129,6 +130,25 @@ public class WikidpadWikiTests
         //assert
         Assert.Single(sut.SelectedPages);
         Assert.Equal("TestOne", sut.SelectedPages[0].Name);
+    }
+
+    [Fact]
+    public void GetPagesBySearchStr_MatchesCaseInsensitivelyWhenRequested()
+    {
+        Directory.CreateDirectory(_dataDir);
+        //arrange
+        File.WriteAllText(Path.Combine(_dataDir, "TestOne.wiki"), "this page has a Needle in it");
+        File.WriteAllText(Path.Combine(_dataDir, "TestTwo.wiki"), "nothing to find here");
+        var sut = new WikidpadWiki(_testDir);
+
+        //actual
+        var caseSensitive = sut.GetPagesBySearchStr("needle");
+        var caseInsensitive = sut.GetPagesBySearchStr("needle", StringComparison.OrdinalIgnoreCase);
+
+        //assert
+        Assert.Empty(caseSensitive);
+        Assert.Single(caseInsensitive);
+        Assert.Equal("TestOne", caseInsensitive[0].Name);
     }
 
     [Fact]
