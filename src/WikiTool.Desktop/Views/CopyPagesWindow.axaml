@@ -1,7 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:WikiTool.Desktop.ViewModels"
-        xmlns:converters="using:WikiTool.Desktop.Converters"
+        xmlns:views="using:WikiTool.Desktop.Views"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="700"
@@ -13,10 +13,6 @@
         MinWidth="700"
         MinHeight="500">
 
-    <Window.Resources>
-        <converters:FolderIconConverter x:Key="FolderIconConverter"/>
-    </Window.Resources>
-
     <DockPanel>
         <!-- Top Configuration Panel -->
         <Border DockPanel.Dock="Top"
@@ -25,47 +21,23 @@
                 BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
                 BorderThickness="0,0,0,1">
             <StackPanel Spacing="15">
-                <!-- Source Wiki and Destination Folder Selection -->
-                <Grid ColumnDefinitions="*,20,*" RowDefinitions="Auto,Auto">
-                    <!-- Source Wiki -->
-                    <StackPanel Grid.Column="0" Grid.Row="0" Spacing="5">
-                        <TextBlock Text="Source Wiki"
-                                   FontWeight="SemiBold"/>
-                        <ComboBox ItemsSource="{Binding AvailableSourceWikis}"
-                                  SelectedItem="{Binding SourceWiki}"
-                                  HorizontalAlignment="Stretch">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate x:DataType="vm:WikiBrowserViewModel">
-                                    <TextBlock Text="{Binding TabTitle}"/>
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
-                    </StackPanel>
-
-                    <!-- Arrow -->
-                    <TextBlock Grid.Column="1" Grid.Row="1"
-                               Text="→"
-                               FontSize="24"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"/>
-
-                    <!-- Destination Folder -->
-                    <StackPanel Grid.Column="2" Grid.Row="0" Spacing="5">
-                        <TextBlock Text="Destination Folder"
-                                   FontWeight="SemiBold"/>
-                        <Grid ColumnDefinitions="*,Auto">
-                            <TextBox Grid.Column="0"
-                                     Text="{Binding DestinationFolderDisplay}"
-                                     IsReadOnly="True"
-                                     PlaceholderText="Select a destination folder..."/>
-                            <Button Grid.Column="1"
-                                    Content="Browse..."
-                                    Command="{Binding BrowseDestinationFolderCommand}"
-                                    Margin="5,0,0,0"
-                                    Padding="10,5"/>
-                        </Grid>
-                    </StackPanel>
-                </Grid>
+                <!-- Destination Folder -->
+                <StackPanel Spacing="5">
+                    <TextBlock Text="Destination Folder"
+                               FontWeight="SemiBold"/>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBox Grid.Column="0"
+                                 Text="{Binding DestinationFolderDisplay}"
+                                 IsReadOnly="True"
+                                 PlaceholderText="Select a destination folder..."/>
+                        <Button Grid.Column="1"
+                                Content="Browse..."
+                                Command="{Binding BrowseDestinationFolderCommand}"
+                                IsEnabled="{Binding !IsProcessing}"
+                                Margin="5,0,0,0"
+                                Padding="10,5"/>
+                    </Grid>
+                </StackPanel>
 
                 <!-- Options -->
                 <StackPanel Orientation="Horizontal" Spacing="20">
@@ -108,92 +80,9 @@
             </Grid>
         </Border>
 
-        <!-- Main Page Selection Area -->
-        <Grid ColumnDefinitions="*">
-            <Border Padding="20">
-                <DockPanel>
-                    <!-- Selection Tools -->
-                    <Border DockPanel.Dock="Top"
-                            Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
-                            Padding="10"
-                            CornerRadius="4"
-                            Margin="0,0,0,10">
-                        <StackPanel Spacing="10">
-                            <!-- Title and bulk selection -->
-                            <Grid ColumnDefinitions="Auto,*,Auto,Auto">
-                                <TextBlock Grid.Column="0"
-                                           Text="Select Pages to Copy"
-                                           FontSize="16"
-                                           FontWeight="SemiBold"
-                                           VerticalAlignment="Center"/>
-
-                                <StackPanel Grid.Column="2"
-                                            Orientation="Horizontal"
-                                            Spacing="10">
-                                    <Button Content="Select All"
-                                            Command="{Binding SelectAllPagesCommand}"
-                                            Padding="10,5"/>
-                                    <Button Content="Deselect All"
-                                            Command="{Binding DeselectAllPagesCommand}"
-                                            Padding="10,5"/>
-                                </StackPanel>
-
-                                <TextBlock Grid.Column="3"
-                                           Text="{Binding SelectedPageCount, StringFormat='{}{0} selected'}"
-                                           VerticalAlignment="Center"
-                                           Margin="15,0,0,0"
-                                           FontWeight="SemiBold"
-                                           Foreground="{DynamicResource SystemAccentColor}"/>
-                            </Grid>
-
-                            <!-- Select by search string -->
-                            <Grid ColumnDefinitions="*,Auto,Auto">
-                                <TextBox Grid.Column="0"
-                                         Text="{Binding SearchStr}"
-                                         PlaceholderText="Search page contents..."
-                                         VerticalAlignment="Center"/>
-                                <CheckBox Grid.Column="1"
-                                          Content="Match case"
-                                          IsChecked="{Binding MatchCase}"
-                                          VerticalAlignment="Center"
-                                          Margin="10,0,0,0"
-                                          ToolTip.Tip="Search page contents case-sensitively"/>
-                                <Button Grid.Column="2"
-                                        Content="Select Matches"
-                                        Command="{Binding SelectBySearchStrCommand}"
-                                        IsEnabled="{Binding !IsProcessing}"
-                                        Margin="10,0,0,0"
-                                        Padding="10,5"/>
-                            </Grid>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- Page Tree with Checkboxes -->
-                    <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
-                            BorderThickness="1"
-                            CornerRadius="4">
-                        <ScrollViewer HorizontalScrollBarVisibility="Auto"
-                                      VerticalScrollBarVisibility="Auto">
-                            <TreeView ItemsSource="{Binding SelectablePages}">
-                                <TreeView.DataTemplates>
-                                    <TreeDataTemplate DataType="vm:SelectablePageNode" ItemsSource="{Binding Children}">
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <CheckBox IsChecked="{Binding CheckState}"
-                                                      IsThreeState="True"
-                                                      VerticalAlignment="Center"/>
-                                            <TextBlock Text="{Binding IsFolder, Converter={StaticResource FolderIconConverter}}"
-                                                       FontSize="14"
-                                                       VerticalAlignment="Center"/>
-                                            <TextBlock Text="{Binding Name}"
-                                                       VerticalAlignment="Center"/>
-                                        </StackPanel>
-                                    </TreeDataTemplate>
-                                </TreeView.DataTemplates>
-                            </TreeView>
-                        </ScrollViewer>
-                    </Border>
-                </DockPanel>
-            </Border>
-        </Grid>
+        <!-- Shared Bulk Page Selection -->
+        <Border Padding="20">
+            <views:BulkSelectPagesView DataContext="{Binding PageSelection}"/>
+        </Border>
     </DockPanel>
 </Window>

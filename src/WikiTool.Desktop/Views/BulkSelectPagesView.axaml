@@ -1,0 +1,126 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:WikiTool.Desktop.ViewModels"
+             xmlns:models="using:WikiTool.Desktop.Models"
+             xmlns:converters="using:WikiTool.Desktop.Converters"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="500"
+             x:Class="WikiTool.Desktop.Views.BulkSelectPagesView"
+             x:DataType="vm:BulkSelectPagesViewModel">
+
+    <UserControl.Resources>
+        <converters:FolderIconConverter x:Key="FolderIconConverter"/>
+    </UserControl.Resources>
+
+    <DockPanel>
+        <!-- Selection Tools -->
+        <Border DockPanel.Dock="Top"
+                Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                Padding="10"
+                CornerRadius="4"
+                Margin="0,0,0,10">
+            <StackPanel Spacing="10">
+                <!-- Title and bulk selection -->
+                <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                    <TextBlock Grid.Column="0"
+                               Text="{Binding Title}"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"/>
+
+                    <StackPanel Grid.Column="2"
+                                Orientation="Horizontal"
+                                Spacing="10">
+                        <Button Content="Select All"
+                                Command="{Binding SelectAllPagesCommand}"
+                                IsEnabled="{Binding !IsBusy}"
+                                Padding="10,5"/>
+                        <Button Content="Deselect All"
+                                Command="{Binding DeselectAllPagesCommand}"
+                                IsEnabled="{Binding !IsBusy}"
+                                Padding="10,5"/>
+                    </StackPanel>
+
+                    <TextBlock Grid.Column="3"
+                               Text="{Binding SelectedPageCount, StringFormat='{}{0} selected'}"
+                               VerticalAlignment="Center"
+                               Margin="15,0,0,0"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource SystemAccentColor}"/>
+                </Grid>
+
+                <!-- Source wiki -->
+                <Grid ColumnDefinitions="Auto,*">
+                    <TextBlock Grid.Column="0"
+                               Text="Source Wiki"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"
+                               Margin="0,0,10,0"/>
+                    <ComboBox Grid.Column="1"
+                              ItemsSource="{Binding AvailableSourceWikis}"
+                              SelectedItem="{Binding SourceWiki}"
+                              IsEnabled="{Binding !IsBusy}"
+                              HorizontalAlignment="Stretch">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:WikiBrowserViewModel">
+                                <TextBlock Text="{Binding TabTitle}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </Grid>
+
+                <!-- Select by search string -->
+                <Grid ColumnDefinitions="*,Auto,Auto">
+                    <TextBox Grid.Column="0"
+                             Text="{Binding SearchStr}"
+                             PlaceholderText="Search page contents..."
+                             VerticalAlignment="Center"/>
+                    <CheckBox Grid.Column="1"
+                              Content="Match case"
+                              IsChecked="{Binding MatchCase}"
+                              VerticalAlignment="Center"
+                              Margin="10,0,0,0"
+                              ToolTip.Tip="Search page contents case-sensitively"/>
+                    <Button Grid.Column="2"
+                            Content="Select Matches"
+                            Command="{Binding SelectBySearchStrCommand}"
+                            IsEnabled="{Binding !IsBusy}"
+                            Margin="10,0,0,0"
+                            Padding="10,5"/>
+                </Grid>
+
+                <!-- Search feedback -->
+                <TextBlock Text="{Binding SearchStatus}"
+                           IsVisible="{Binding SearchStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                           TextWrapping="Wrap"
+                           Opacity="0.8"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Page Tree with Checkboxes -->
+        <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                BorderThickness="1"
+                CornerRadius="4">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Auto">
+                <TreeView ItemsSource="{Binding SelectablePages}">
+                    <TreeView.DataTemplates>
+                        <TreeDataTemplate DataType="models:SelectablePageNode" ItemsSource="{Binding Children}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <CheckBox IsChecked="{Binding CheckState}"
+                                          IsThreeState="True"
+                                          VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding IsFolder, Converter={StaticResource FolderIconConverter}}"
+                                           FontSize="14"
+                                           VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Name}"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </TreeDataTemplate>
+                    </TreeView.DataTemplates>
+                </TreeView>
+            </ScrollViewer>
+        </Border>
+    </DockPanel>
+</UserControl>
