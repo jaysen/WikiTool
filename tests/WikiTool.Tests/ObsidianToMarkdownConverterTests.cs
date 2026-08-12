@@ -423,7 +423,7 @@ public class ObsidianToMarkdownConverterTests : IDisposable
     #region Site scaffolding
 
     [Fact]
-    public void Scaffolding_WritesConfigIndexAndTagIndex()
+    public void Scaffolding_WritesConfigAndBothIndexes()
     {
         WritePage("Alpha.md", "Body #project");
 
@@ -433,11 +433,91 @@ public class ObsidianToMarkdownConverterTests : IDisposable
         Assert.Contains("jekyll-relative-links", config);
         Assert.Contains("relative_links:", config);
 
-        Assert.Contains("[Alpha](alpha.md)", ReadOutput("index.md"));
+        Assert.Contains("[Alpha](../alpha.md)", ReadOutput("indexes/page-index.md"));
 
-        var tags = ReadOutput("tags.md");
+        var tags = ReadOutput("indexes/tag-index.md");
         Assert.Contains("## project", tags);
-        Assert.Contains("[Alpha](alpha.md)", tags);
+        Assert.Contains("[Alpha](../alpha.md)", tags);
+    }
+
+    /// <summary>
+    /// index.md becomes index.html and belongs to the wiki's own home page, so the
+    /// generated listings must never claim it.
+    /// </summary>
+    [Fact]
+    public void Scaffolding_NeverWritesAnIndexFileAtTheSiteRoot()
+    {
+        WritePage("Alpha.md", "Body");
+
+        Convert(scaffolding: true);
+
+        Assert.False(File.Exists(Path.Combine(_dest, "index.md")));
+        Assert.False(File.Exists(Path.Combine(_dest, "tags.md")));
+    }
+
+    [Fact]
+    public void Scaffolding_LinksBetweenTheTwoIndexes()
+    {
+        WritePage("Alpha.md", "Body #project");
+
+        Convert(scaffolding: true);
+
+        Assert.Contains("[tag index](tag-index.md)", ReadOutput("indexes/page-index.md"));
+    }
+
+    /// <summary>
+    /// Index links are relative to the index folder, not the site root.
+    /// </summary>
+    [Fact]
+    public void IndexLinks_ResolveFromInsideTheIndexFolder()
+    {
+        WritePage("Projects/Alpha.md", "Body #project");
+
+        Convert(scaffolding: true);
+
+        Assert.Contains("(../projects/alpha.md)", ReadOutput("indexes/page-index.md"));
+        Assert.Contains("(../projects/alpha.md)", ReadOutput("indexes/tag-index.md"));
+    }
+
+    [Fact]
+    public void IndexFolder_CanBeChanged()
+    {
+        WritePage("Alpha.md", "Body");
+
+        var converter = new ObsidianToMarkdownConverter(_source, _dest)
+        {
+            IndexFolder = "Site Listings"
+        };
+        converter.ConvertAll();
+
+        Assert.True(File.Exists(Path.Combine(_dest, "site-listings", "page-index.md")));
+    }
+
+    [Fact]
+    public void EmptyIndexFolder_WritesIndexesAtTheRoot()
+    {
+        WritePage("Alpha.md", "Body");
+
+        var converter = new ObsidianToMarkdownConverter(_source, _dest)
+        {
+            IndexFolder = ""
+        };
+        converter.ConvertAll();
+
+        Assert.Contains("[Alpha](alpha.md)", ReadOutput("page-index.md"));
+    }
+
+    /// <summary>
+    /// A page the vault itself produced at index.md is the site home page and must survive.
+    /// </summary>
+    [Fact]
+    public void ConvertedHomePage_IsLeftAlone()
+    {
+        WritePage("index.md", "My own home page");
+
+        Convert(scaffolding: true);
+
+        Assert.Contains("My own home page", ReadOutput("index.md"));
     }
 
     [Fact]
@@ -451,16 +531,6 @@ public class ObsidianToMarkdownConverterTests : IDisposable
 
         Assert.Equal("title: Hand written", ReadOutput("_config.yml"));
         Assert.Contains(converter.Warnings, w => w.Contains("_config.yml"));
-    }
-
-    [Fact]
-    public void Scaffolding_DoesNotOverwriteAConvertedHomePage()
-    {
-        WritePage("index.md", "My own home page");
-
-        Convert(scaffolding: true);
-
-        Assert.Contains("My own home page", ReadOutput("index.md"));
     }
 
     #endregion
