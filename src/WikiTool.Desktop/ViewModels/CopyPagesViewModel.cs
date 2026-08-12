@@ -31,6 +31,9 @@ public partial class CopyPagesViewModel : ViewModelBase
     private string _searchStr = string.Empty;
 
     [ObservableProperty]
+    private bool _matchCase;
+
+    [ObservableProperty]
     private bool _isProcessing;
 
     [ObservableProperty]
@@ -213,6 +216,7 @@ public partial class CopyPagesViewModel : ViewModelBase
 
         var rootPath = SourceWiki.WikiRootPath;
         var searchStr = SearchStr;
+        var comparison = MatchCase ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 
         IsProcessing = true;
         StatusMessage = $"Searching pages for '{searchStr}'...";
@@ -222,7 +226,7 @@ public partial class CopyPagesViewModel : ViewModelBase
             // Reading every page is slow on large wikis, so keep it off the UI thread.
             var matchedPaths = await Task.Run(() =>
                 WikiFactory.CreateForPath(rootPath)
-                    .GetPagesBySearchStr(searchStr, StringComparison.OrdinalIgnoreCase)
+                    .GetPagesBySearchStr(searchStr, comparison)
                     .OfType<LocalPage>()
                     .Select(p => p.PagePath)
                     .ToList());

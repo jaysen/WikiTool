@@ -118,47 +118,54 @@
                             Padding="10"
                             CornerRadius="4"
                             Margin="0,0,0,10">
-                        <Grid ColumnDefinitions="Auto,*,Auto,Auto">
-                            <TextBlock Grid.Column="0"
-                                       Text="Select Pages to Copy"
-                                       FontSize="16"
-                                       FontWeight="SemiBold"
-                                       VerticalAlignment="Center"/>
+                        <StackPanel Spacing="10">
+                            <!-- Title and bulk selection -->
+                            <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                                <TextBlock Grid.Column="0"
+                                           Text="Select Pages to Copy"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           VerticalAlignment="Center"/>
 
-                            <StackPanel Grid.Column="1"
-                                        Orientation="Horizontal"
-                                        Spacing="8"
-                                        HorizontalAlignment="Right"
-                                        Margin="0,0,15,0">
-                                <TextBox MinWidth="120"
-                                         Width="220"
+                                <StackPanel Grid.Column="2"
+                                            Orientation="Horizontal"
+                                            Spacing="10">
+                                    <Button Content="Select All"
+                                            Command="{Binding SelectAllPagesCommand}"
+                                            Padding="10,5"/>
+                                    <Button Content="Deselect All"
+                                            Command="{Binding DeselectAllPagesCommand}"
+                                            Padding="10,5"/>
+                                </StackPanel>
+
+                                <TextBlock Grid.Column="3"
+                                           Text="{Binding SelectedPageCount, StringFormat='{}{0} selected'}"
+                                           VerticalAlignment="Center"
+                                           Margin="15,0,0,0"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource SystemAccentColor}"/>
+                            </Grid>
+
+                            <!-- Select by search string -->
+                            <Grid ColumnDefinitions="*,Auto,Auto">
+                                <TextBox Grid.Column="0"
                                          Text="{Binding SearchStr}"
                                          PlaceholderText="Search page contents..."
                                          VerticalAlignment="Center"/>
-                                <Button Content="Select Matches"
+                                <CheckBox Grid.Column="1"
+                                          Content="Match case"
+                                          IsChecked="{Binding MatchCase}"
+                                          VerticalAlignment="Center"
+                                          Margin="10,0,0,0"
+                                          ToolTip.Tip="Search page contents case-sensitively"/>
+                                <Button Grid.Column="2"
+                                        Content="Select Matches"
                                         Command="{Binding SelectBySearchStrCommand}"
                                         IsEnabled="{Binding !IsProcessing}"
+                                        Margin="10,0,0,0"
                                         Padding="10,5"/>
-                            </StackPanel>
-
-                            <StackPanel Grid.Column="2"
-                                        Orientation="Horizontal"
-                                        Spacing="10">
-                                <Button Content="Select All"
-                                        Command="{Binding SelectAllPagesCommand}"
-                                        Padding="10,5"/>
-                                <Button Content="Deselect All"
-                                        Command="{Binding DeselectAllPagesCommand}"
-                                        Padding="10,5"/>
-                            </StackPanel>
-
-                            <TextBlock Grid.Column="3"
-                                       Text="{Binding SelectedPageCount, StringFormat='{}{0} selected'}"
-                                       VerticalAlignment="Center"
-                                       Margin="15,0,0,0"
-                                       FontWeight="SemiBold"
-                                       Foreground="{DynamicResource SystemAccentColor}"/>
-                        </Grid>
+                            </Grid>
+                        </StackPanel>
                     </Border>
 
                     <!-- Page Tree with Checkboxes -->
