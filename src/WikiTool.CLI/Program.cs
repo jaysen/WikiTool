@@ -13,7 +13,9 @@ var toFormatOption = new Option<string>("--to",     ["-t"]) { Description = "Des
 var convertCategoriesOption = new Option<bool>("--convert-categories")
     { Description = "wikidpad -> obsidian: convert CategoryName patterns to #Name tags" };
 var noScaffoldingOption = new Option<bool>("--no-scaffolding")
-    { Description = "obsidian -> markdown: skip generating _config.yml, index.md and tags.md" };
+    { Description = "obsidian -> markdown: skip generating _config.yml and the page/tag indexes" };
+var indexFolderOption = new Option<string>("--index-folder")
+    { Description = "obsidian -> markdown: folder for the generated indexes (default 'indexes', empty for the site root)" };
 var keepInlineTagsOption = new Option<bool>("--keep-inline-tags")
     { Description = "obsidian -> markdown: leave inline #tags in the body instead of hoisting them to frontmatter" };
 var siteTitleOption = new Option<string>("--site-title")
@@ -27,6 +29,7 @@ convertCommand.Options.Add(formatOption);
 convertCommand.Options.Add(toFormatOption);
 convertCommand.Options.Add(convertCategoriesOption);
 convertCommand.Options.Add(noScaffoldingOption);
+convertCommand.Options.Add(indexFolderOption);
 convertCommand.Options.Add(keepInlineTagsOption);
 convertCommand.Options.Add(siteTitleOption);
 convertCommand.Options.Add(forceOption);
@@ -58,11 +61,14 @@ convertCommand.SetAction((parseResult) =>
 
         case "obsidian->markdown":
         {
+            var indexFolder = parseResult.GetValue(indexFolderOption);
+
             var converter = new ObsidianToMarkdownConverter(source, dest)
             {
                 GenerateSiteFiles = !parseResult.GetValue(noScaffoldingOption),
                 StripInlineTags   = !parseResult.GetValue(keepInlineTagsOption),
                 SiteTitle         = parseResult.GetValue(siteTitleOption),
+                IndexFolder       = indexFolder ?? "indexes",
                 Force             = parseResult.GetValue(forceOption)
             };
             converter.ConvertAll();

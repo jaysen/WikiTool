@@ -19,9 +19,26 @@ public class JekyllSiteWriter
     private readonly VaultIndex _index;
 
     /// <summary>
-    /// Site title written into _config.yml and used as the home page heading.
+    /// Name of the generated page listing, written inside <see cref="IndexFolder"/>.
+    /// </summary>
+    public const string PageIndexFileName = "page-index.md";
+
+    /// <summary>
+    /// Name of the generated tag listing, written inside <see cref="IndexFolder"/>.
+    /// </summary>
+    public const string TagIndexFileName = "tag-index.md";
+
+    /// <summary>
+    /// Site title written into _config.yml and used as the index page heading.
     /// </summary>
     public string SiteTitle { get; set; } = "Wiki";
+
+    /// <summary>
+    /// Folder the generated indexes are written into. Deliberately not the site root:
+    /// index.md there becomes index.html, which belongs to the wiki's own home page.
+    /// Set to an empty string to write the indexes at the root instead.
+    /// </summary>
+    public string IndexFolder { get; set; } = "indexes";
 
     /// <summary>
     /// Allows overwriting an existing _config.yml. Default is false, so a hand-tuned
@@ -79,13 +96,15 @@ public class JekyllSiteWriter
     }
 
     /// <summary>
-    /// Write a home page listing every converted page, grouped by folder.
-    /// Skipped if the vault already produced a page at index.md.
+    /// Write a listing of every converted page, grouped by folder.
     /// </summary>
     private void WriteIndex()
     {
-        if (HasConvertedPageAt("index.md"))
+        var self = IndexPath(PageIndexFileName);
+
+        if (HasConvertedPageAt(self))
         {
+            Warnings.Add($"A converted page occupies {self}; the page index was not written.");
             return;
         }
 
@@ -106,11 +125,11 @@ public class JekyllSiteWriter
 
         var sb = new StringBuilder();
         sb.AppendLine("---");
-        sb.AppendLine($"title: {Quote(SiteTitle)}");
+        sb.AppendLine($"title: {Quote(SiteTitle + " - All Pages")}");
         sb.AppendLine("---");
-        sb.AppendLine($"# {SiteTitle}");
+        sb.AppendLine($"# {SiteTitle} - All Pages");
         sb.AppendLine();
-        sb.AppendLine($"{_index.Pages.Count} pages. See also the [tag index](tags.md).");
+        sb.AppendLine($"{_index.Pages.Count} pages. See also the [tag index]({TagIndexFileName}).");
 
         foreach (var folder in byFolder)
         {
@@ -122,11 +141,11 @@ public class JekyllSiteWriter
 
             foreach (var page in folder.Value)
             {
-                sb.AppendLine($"- [{page.Title}]({page.OutputRelPath})");
+                sb.AppendLine($"- [{page.Title}]({LinkTo(self, page)})");
             }
         }
 
-        File.WriteAllText(Path.Combine(_destinationPath, "index.md"), sb.ToString());
+        WriteIndexFile(self, sb.ToString());
     }
 
     /// <summary>
@@ -134,9 +153,11 @@ public class JekyllSiteWriter
     /// </summary>
     private void WriteTagIndex()
     {
-        if (HasConvertedPageAt("tags.md"))
+        var self = IndexPath(TagIndexFileName);
+
+        if (HasConvertedPageAt(self))
         {
-            Warnings.Add("A converted page occupies tags.md; the tag index was not written.");
+            Warnings.Add($"A converted page occupies {self}; the tag index was not written.");
             return;
         }
 
@@ -158,9 +179,9 @@ public class JekyllSiteWriter
 
         var sb = new StringBuilder();
         sb.AppendLine("---");
-        sb.AppendLine("title: \"Tags\"");
+        sb.AppendLine($"title: {Quote(SiteTitle + " - Tags")}");
         sb.AppendLine("---");
-        sb.AppendLine("# Tags");
+        sb.AppendLine($"# {SiteTitle} - Tags");
 
         if (byTag.Count == 0)
         {
@@ -178,11 +199,41 @@ public class JekyllSiteWriter
 
             foreach (var page in tag.Value)
             {
-                sb.AppendLine($"- [{page.Title}]({page.OutputRelPath})");
+                sb.AppendLine($"- [{page.Title}]({LinkTo(self, page)})");
             }
         }
 
-        File.WriteAllText(Path.Combine(_destinationPath, "tags.md"), sb.ToString());
+        WriteIndexFile(self, sb.ToString());
+    }
+
+    /// <summary>
+    /// Output path of a generated index, honouring <see cref="IndexFolder"/>.
+    /// The folder is slugged so it can never begin with '_' or '.', which Jekyll excludes.
+    /// </summary>
+    private string IndexPath(string fileName)
+    {
+        if (string.IsNullOrWhiteSpace(IndexFolder))
+        {
+            return fileName;
+        }
+
+        return Slug.ForPath(IndexFolder) + "/" + fileName;
+    }
+
+    /// <summary>
+    /// Link from a generated index to a converted page. Indexes live in their own folder,
+    /// so these have to be relative to that folder rather than to the site root.
+    /// </summary>
+    private static string LinkTo(string indexRelPath, VaultPage page)
+    {
+        return ObsidianToMarkdownConverter.MakeRelative(indexRelPath, page.OutputRelPath);
+    }
+
+    private void WriteIndexFile(string relPath, string content)
+    {
+        var fullPath = Path.Combine(_destinationPath, relPath.Replace('/', Path.DirectorySeparatorChar));
+        Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
+        File.WriteAllText(fullPath, content);
     }
 
     private bool HasConvertedPageAt(string outputRelPath)

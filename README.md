@@ -209,17 +209,23 @@ the repository on github.com and when served from Pages.
 Alongside the converted pages the converter writes:
 
 - `_config.yml` - theme and the plugin settings the links depend on
-- `index.md` - a home page listing every page, grouped by folder
-- `tags.md` - a tag index listing the pages under each tag
+- `indexes/page-index.md` - a listing of every page, grouped by folder
+- `indexes/tag-index.md` - a listing of the pages under each tag
 
-An existing `_config.yml` is never overwritten without `--force`, and the generated home
-page is skipped if the vault already produced one.
+Nothing is generated at `index.md`. Jekyll turns that into `index.html`, the site's home
+page, so it is left for your own wiki to provide - either a note named `index` or `Home`
+that you rename. Link to `indexes/page-index.md` and `indexes/tag-index.md` from it.
+
+The index folder is configurable with `--index-folder`; pass an empty value to write
+`page-index.md` and `tag-index.md` at the site root instead. An existing `_config.yml` is
+never overwritten without `--force`.
 
 Options for this conversion:
 
 | Option | Effect |
 |--------|--------|
-| `--no-scaffolding` | Emit only the converted Markdown, no `_config.yml`/`index.md`/`tags.md` |
+| `--no-scaffolding` | Emit only the converted Markdown, no `_config.yml` and no indexes |
+| `--index-folder` | Folder for the generated indexes (default `indexes`, empty for the site root) |
 | `--keep-inline-tags` | Leave `#tags` in the body instead of hoisting them to frontmatter |
 | `--site-title` | Title for the generated site (defaults to the source folder name) |
 | `--force` | Overwrite generated site files that already exist |

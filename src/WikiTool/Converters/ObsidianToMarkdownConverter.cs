@@ -31,10 +31,15 @@ public partial class ObsidianToMarkdownConverter
     public bool StripInlineTags { get; set; } = true;
 
     /// <summary>
-    /// When true, writes _config.yml, index.md and tags.md alongside the converted pages.
-    /// Default is true.
+    /// When true, writes _config.yml and the generated page and tag indexes alongside the
+    /// converted pages. Default is true.
     /// </summary>
     public bool GenerateSiteFiles { get; set; } = true;
+
+    /// <summary>
+    /// Folder the generated indexes are written into. See <see cref="JekyllSiteWriter.IndexFolder"/>.
+    /// </summary>
+    public string IndexFolder { get; set; } = "indexes";
 
     /// <summary>
     /// Site title written into _config.yml.
@@ -119,6 +124,7 @@ public partial class ObsidianToMarkdownConverter
             var writer = new JekyllSiteWriter(DestinationPath, _index)
             {
                 SiteTitle = SiteTitle ?? new DirectoryInfo(SourcePath).Name,
+                IndexFolder = IndexFolder,
                 Force = Force
             };
             writer.Write();
