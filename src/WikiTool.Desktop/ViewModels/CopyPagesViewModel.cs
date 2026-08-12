@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WikiTool.Desktop.Models;
 using WikiTool.Desktop.Services;
+using WikiTool.Pages;
 
 namespace WikiTool.Desktop.ViewModels;
 
@@ -25,6 +26,9 @@ public partial class CopyPagesViewModel : ViewModelBase
 
     [ObservableProperty]
     private ObservableCollection<SelectablePageNode> _selectablePages = [];
+
+    [ObservableProperty]
+    private string _searchStr = string.Empty;
 
     [ObservableProperty]
     private bool _isProcessing;
@@ -193,6 +197,43 @@ public partial class CopyPagesViewModel : ViewModelBase
         foreach (var node in nodes)
         {
             node.CheckState = isSelected;
+        }
+    }
+
+    [RelayCommand]
+    private void SelectBySearchStr()
+    {
+        if (SourceWiki == null || string.IsNullOrWhiteSpace(SearchStr))
+        {
+            return;
+        }
+
+        var wiki = WikiFactory.CreateForPath(SourceWiki.WikiRootPath);
+        var matchedPages = wiki.GetPagesBySearchStr(SearchStr);
+        var matchedPaths = matchedPages.OfType<LocalPage>().Select(p => p.PagePath);
+
+        SelectPagesMatching(matchedPaths);
+        StatusMessage = $"{SelectedPageCount} page(s) matched '{SearchStr}'";
+    }
+
+    private void SelectPagesMatching(IEnumerable<string> matchedPaths)
+    {
+        var matchedSet = new HashSet<string>(matchedPaths, StringComparer.OrdinalIgnoreCase);
+        foreach (var node in FlattenNodes(SelectablePages).Where(n => !n.IsFolder))
+        {
+            node.CheckState = matchedSet.Contains(node.FolderTreeNode.FullPath);
+        }
+    }
+
+    private static IEnumerable<SelectablePageNode> FlattenNodes(IEnumerable<SelectablePageNode> nodes)
+    {
+        foreach (var node in nodes)
+        {
+            yield return node;
+            foreach (var descendant in FlattenNodes(node.Children))
+            {
+                yield return descendant;
+            }
         }
     }
 
