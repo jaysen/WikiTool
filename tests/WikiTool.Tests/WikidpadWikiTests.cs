@@ -91,9 +91,58 @@ public class WikidpadWikiTests
         Assert.Equal(expected, pageList[0].GetContent());
         Assert.Equal(expected2, pageList[1].GetContent());
 
-        Assert.False(pageList[0].ContentIsStale);            
+        Assert.False(pageList[0].ContentIsStale);
         Assert.False(pageList[1].ContentIsStale);
 
 
+    }
+
+    [Fact]
+    public void GetPagesBySearchStr_ReturnsOnlyMatchingPages()
+    {
+        Directory.CreateDirectory(_dataDir);
+        //arrange
+        File.WriteAllText(Path.Combine(_dataDir, "TestOne.wiki"), "+ Test One\n\nthis page has a needle in it");
+        File.WriteAllText(Path.Combine(_dataDir, "TestTwo.wiki"), "+ Test Two\n\nnothing to find here");
+        var sut = new WikidpadWiki(_testDir);
+
+        //actual
+        var result = sut.GetPagesBySearchStr("needle");
+
+        //assert
+        Assert.Single(result);
+        Assert.Equal("TestOne", result[0].Name);
+    }
+
+    [Fact]
+    public void GetPagesBySearchStr_PopulatesSelectedPages()
+    {
+        Directory.CreateDirectory(_dataDir);
+        //arrange
+        File.WriteAllText(Path.Combine(_dataDir, "TestOne.wiki"), "this page has a needle in it");
+        File.WriteAllText(Path.Combine(_dataDir, "TestTwo.wiki"), "nothing to find here");
+        var sut = new WikidpadWiki(_testDir);
+
+        //actual
+        sut.GetPagesBySearchStr("needle");
+
+        //assert
+        Assert.Single(sut.SelectedPages);
+        Assert.Equal("TestOne", sut.SelectedPages[0].Name);
+    }
+
+    [Fact]
+    public void GetPagesBySearchStr_ReturnsEmptyWhenNoMatches()
+    {
+        Directory.CreateDirectory(_dataDir);
+        //arrange
+        File.WriteAllText(Path.Combine(_dataDir, "TestOne.wiki"), "nothing to find here");
+        var sut = new WikidpadWiki(_testDir);
+
+        //actual
+        var result = sut.GetPagesBySearchStr("needle");
+
+        //assert
+        Assert.Empty(result);
     }
 }
