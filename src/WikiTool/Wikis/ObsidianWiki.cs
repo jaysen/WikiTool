@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using WikiTool.Pages;
@@ -31,10 +30,5 @@ public class ObsidianWiki : LocalWiki
         }
 
         return pages;
-    }
-
-    public override List<Page> GetPagesBySearchStr()
-    {
-        throw new NotImplementedException();
     }
 }

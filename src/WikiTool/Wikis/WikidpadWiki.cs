@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using WikiTool.Pages;
 
@@ -37,10 +36,5 @@ public class WikidpadWiki : LocalWiki
             pages.Add(new WikidpadPage(file, this));
         }
         return pages;
-    }
-
-    public override List<Page> GetPagesBySearchStr()
-    {
-        throw new NotImplementedException();
     }
 }

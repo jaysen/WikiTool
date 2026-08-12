@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using WikiTool;
 using WikiTool.Pages;
@@ -57,6 +58,26 @@ public class StaticLocalPagesTests
         //actual
         Assert.Equal(expected, LocalPages.ContainsText(path, searchStr));
     }
+    [Theory]
+    [InlineData("some text", StringComparison.Ordinal, true)]
+    [InlineData("SOME TEXT", StringComparison.Ordinal, false)]
+    [InlineData("SOME TEXT", StringComparison.OrdinalIgnoreCase, true)]
+    [InlineData("NUMNUM", StringComparison.OrdinalIgnoreCase, false)]
+    public void ContainsText_HonoursComparison(string searchStr, StringComparison comparison, bool expected)
+    {
+        //arrange
+        var path = Path.Combine(_testFolder, "contains_text_comparison_test.wiki");
+        using (var sw = File.CreateText(path))
+        {
+            sw.WriteLine("## MD Heading");
+            sw.WriteLine("some text");
+            sw.WriteLine("and a hashtag #test");
+        }
+
+        //actual
+        Assert.Equal(expected, LocalPages.ContainsText(path, searchStr, comparison));
+    }
+
     [Fact]
     public void ContainsText_ThrowsIfFileNotExist()
     {

@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 
 namespace WikiTool.Pages;
@@ -25,13 +26,13 @@ public abstract class LocalPage : Page
         return _contents;
     }
 
-    public override bool ContainsText(string searchStr)
+    public override bool ContainsText(string searchStr, StringComparison comparison = StringComparison.Ordinal)
     {
         if (ContentIsStale)
         {
             GetContent();
         }
-        return _contents.Contains(searchStr);
+        return _contents.Contains(searchStr, comparison);
     }
 
 }
@@ -48,9 +49,9 @@ public static class LocalPages
         return File.ReadAllText(path);
     }
 
-    public static bool ContainsText(string path, string searchStr)
+    public static bool ContainsText(string path, string searchStr, StringComparison comparison = StringComparison.Ordinal)
     {
         var contents = GetPageContent(path);
-        return contents.Contains(searchStr);
+        return contents.Contains(searchStr, comparison);
     }
 }

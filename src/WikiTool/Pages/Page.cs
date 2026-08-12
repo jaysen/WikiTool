@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace WikiTool.Pages;
 
@@ -22,6 +23,10 @@ public abstract class Page
     public abstract List<string> GetTags();
     public abstract Dictionary<string, string> GetAttributes();
 
-    public abstract bool ContainsText(string searchStr);
+    /// <summary>
+    /// Returns true if the page content contains searchStr. Matching is case-sensitive
+    /// unless an alternative comparison such as OrdinalIgnoreCase is supplied.
+    /// </summary>
+    public abstract bool ContainsText(string searchStr, StringComparison comparison = StringComparison.Ordinal);
 
 }

@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WikiTool.Desktop.Models;
 using WikiTool.Desktop.Services;
+using WikiTool.Pages;
 
 namespace WikiTool.Desktop.ViewModels;
 
@@ -25,6 +26,12 @@ public partial class CopyPagesViewModel : ViewModelBase
 
     [ObservableProperty]
     private ObservableCollection<SelectablePageNode> _selectablePages = [];
+
+    [ObservableProperty]
+    private string _searchStr = string.Empty;
+
+    [ObservableProperty]
+    private bool _matchCase;
 
     [ObservableProperty]
     private bool _isProcessing;
@@ -193,6 +200,68 @@ public partial class CopyPagesViewModel : ViewModelBase
         foreach (var node in nodes)
         {
             node.CheckState = isSelected;
+        }
+    }
+
+    [RelayCommand]
+    private async Task SelectBySearchStrAsync()
+    {
+        if (SourceWiki == null
+            || string.IsNullOrWhiteSpace(SourceWiki.WikiRootPath)
+            || string.IsNullOrWhiteSpace(SearchStr)
+            || IsProcessing)
+        {
+            return;
+        }
+
+        var rootPath = SourceWiki.WikiRootPath;
+        var searchStr = SearchStr;
+        var comparison = MatchCase ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+
+        IsProcessing = true;
+        StatusMessage = $"Searching pages for '{searchStr}'...";
+
+        try
+        {
+            // Reading every page is slow on large wikis, so keep it off the UI thread.
+            var matchedPaths = await Task.Run(() =>
+                WikiFactory.CreateForPath(rootPath)
+                    .GetPagesBySearchStr(searchStr, comparison)
+                    .OfType<LocalPage>()
+                    .Select(p => p.PagePath)
+                    .ToList());
+
+            SelectPagesMatching(matchedPaths);
+            StatusMessage = $"{SelectedPageCount} page(s) matched '{searchStr}'";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Error searching pages: {ex.Message}";
+        }
+        finally
+        {
+            IsProcessing = false;
+        }
+    }
+
+    private void SelectPagesMatching(IEnumerable<string> matchedPaths)
+    {
+        var matchedSet = new HashSet<string>(matchedPaths, StringComparer.OrdinalIgnoreCase);
+        foreach (var node in FlattenNodes(SelectablePages).Where(n => !n.IsFolder))
+        {
+            node.CheckState = matchedSet.Contains(node.FolderTreeNode.FullPath);
+        }
+    }
+
+    private static IEnumerable<SelectablePageNode> FlattenNodes(IEnumerable<SelectablePageNode> nodes)
+    {
+        foreach (var node in nodes)
+        {
+            yield return node;
+            foreach (var descendant in FlattenNodes(node.Children))
+            {
+                yield return descendant;
+            }
         }
     }
 
